@@ -1,144 +1,138 @@
 # Learning Coach
 
-A personal learning and interview preparation agent. The application provides a React dashboard, persistent profiles and tutor conversations, rubric-based practice, weak-area tracking, and revision dates through FastAPI and SQLite.
+A local learning and interview preparation app connecting **teach → practice → feedback → revisit weak areas → advance**, built with React, FastAPI, SQLite, LangChain, and OpenAI.
 
-The current release focuses on **Python for ML → MLOps basics → a guided delivery-time prediction project**. All other modules remain visible as **Coming soon**, with earlier starter lessons still accessible. The focused path includes 12 authored lessons and 48 assessment tasks across four levels, plus a downloadable runnable project kit. Reading lessons and running the local project do not use OpenAI API tokens; tutor chats and answer feedback do.
+## Current implementation
 
-Open **Guided project** to save milestone drafts and resume your work. Each level has its own workspace with six milestones: data, baseline, training, evaluation, deployment and monitoring. Save drafts locally without an API call; request feedback when ready. Submitted versions remain immutable, retries reuse saved answers, and feedback contributes to the existing weak-area/revision tracker with links to relevant lessons. Save before leaving the workspace; moving between milestones saves changes to the current draft. A milestone meets requirements only when its latest accepted feedback meets every rubric criterion. This is AI review of submitted text, not code execution or a mastery certificate.
+The active learning path is **Python for ML → MLOps → a guided ML project**. Other modules remain visible as **Coming soon**. Four levels are supported: Beginner, Foundational, Intermediate, and Advanced.
 
-**Tech updates** provides a manually refreshed, cached digest from official Python, scikit-learn, MLflow, PyTorch, Hugging Face Transformers and OpenAI feeds. Up to five relevant recent announcements include original links, source dates, learning suggestions and related foundations. Save a snapshot to revisit later. Refresh defaults to source excerpts without model usage. AI summaries require explicitly checking the option and use the backend OpenAI key; unchanged AI digests are reused. Opening the section makes no feed or model requests. Source failures and stale digests are identified, and a failed refresh preserves the previous digest. This is a curated feed digest, not exhaustive news coverage or a claim that every item was published today.
+| Feature | Current behavior |
+| --- | --- |
+| Curriculum | Shared role/module/topic catalog, prerequisites, level-specific lessons, and module/topic preferences |
+| Tutor | Persistent conversations, Markdown and math rendering, lesson context, and weak-area context |
+| Practice | Continuous conceptual and applied practice inside submodules, separate role interview runs, and final summaries |
+| Feedback | Rubric judgments with answer evidence, deterministic scores, retry protection, and local feedback reports |
+| Question help | Discussion scoped to the question, submitted answer, and feedback; explanations do not change grades |
+| Revision | Weak areas and due reviews derived from accepted practice and interview attempts |
+| Job target | Extract and review pasted job requirements; map to available, planned, or unmapped curriculum topics |
+| Guided project | Starter ZIP, six milestones, saved drafts, independent level workspaces, and assessed submissions |
+| Tech updates | Manual official-source refresh, cached digest, source dates/links, optional AI summaries, and saved reading list |
 
-## Run locally
+As of **October 23, 2026**, the catalog contains **5 roles, 26 modules, and 271 reusable topics**, representing 300 supplied role-topic entries. Catalog presence does not mean a complete course exists.
 
-Use Python 3.11 or newer and Node.js 22.12 or newer.
+There are **30 authored lessons and 102 questions**: 12 focused lessons/48 questions across the three active submodules at four levels; 4 Python variables/types lessons/16 questions; and 14 retained starter lessons/38 questions. Project milestone assessments are separate. Broader authored coverage and the role/level project ladder remain planned.
 
-Backend, from the project root in PowerShell:
+## Architecture
+
+```mermaid
+flowchart LR
+    UI[React and Vite] --> API[FastAPI]
+    API --> Services[Curriculum, practice, revision and projects]
+    Services --> DB[(SQLite via SQLAlchemy)]
+    API --> Tutor[LangChain tutor]
+    Tutor --> Tools[Read-only lesson and profile tools]
+    Tutor --> Model[OpenAI]
+    API --> Structured[Structured evaluation and extraction]
+    Structured --> Model
+    API --> Feeds[Official RSS and Atom feeds]
+```
+
+The LangChain `create_agent` tutor exposes only `get_lesson` and `get_learning_profile`. The server supplies lesson and weak-area context. Deterministic application services select assessed questions, calculate scores, persist results, and schedule revision. Separate bounded calls handle evaluation, question help, job extraction, and optional news summaries. There is no arbitrary learner-code execution, vector database, multiagent orchestration, or autonomous browser.
+
+## Local setup
+
+Requirements: Python 3.11+ and Node.js 22.12+. In PowerShell from the repository root:
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\python -m pip install -r backend/requirements-dev.txt
-Copy-Item backend/.env.example backend/.env
+if (-not (Test-Path backend/.env)) { Copy-Item backend/.env.example backend/.env }
+```
+
+Set `OPENAI_API_KEY` in `backend/.env`. The configured default `OPENAI_MODEL` is `gpt-4.1-mini`. Never commit your key.
+
+```powershell
 .\.venv\Scripts\python -m uvicorn app.main:app --app-dir backend --host 127.0.0.1 --port 8001
 ```
 
-Frontend, in a second terminal:
+In another terminal:
 
 ```powershell
 cd frontend
-npm install
+npm ci
 npm run dev
 ```
 
-Open the URL Vite prints, usually http://127.0.0.1:5173. Its development proxy connects `/api` to the backend on port 8001. API documentation is at http://127.0.0.1:8001/docs.
+Open Vite's printed URL, normally `http://127.0.0.1:5173`. Startup creates the local database and applies versioned content seeds. The development requirements include tests and ML-example dependencies; `backend/requirements.txt` contains app runtime dependencies. The older backend lock snapshot does not cover the complete ML example environment.
 
-Store your OpenAI key only in `backend/.env`. It is not needed for this milestone. Never use a `VITE_` variable for secrets: those are included in browser code. Environment files, databases, virtual environments, generated previews, and node_modules are ignored by Git.
+## User flow
 
-## Verify
+1. Set role, level, study preferences, and timezone in **Learning profile**. Optionally paste and review a job description in **Job target**.
+2. Open **Modules**, choose an available submodule, read its lesson, and ask the tutor questions.
+3. Begin conceptual or applied practice within that submodule and continue without repeatedly selecting it. **Role interview** uses the role's available question bank.
+4. Submit an answer, inspect rubric feedback, and open question-specific help for clarification. Feedback reports are saved locally.
+5. Open **Your progress** to revisit weak areas and due reviews. End a run to see its summary.
+6. Work through the **Guided project**, explicitly save drafts, and submit milestone evidence. Refresh **Tech updates** when desired.
+
+Selected levels change content and difficulty; there is no automatic diagnostic or proficiency certification. Reviewed job requirements influence recommendations but do not generate a new interview question bank.
+
+## Guided ML project
+
+The [delivery-time starter](examples/ml_project/README.md) uses 120 deterministic synthetic rows split into 72 training, 24 validation, and 24 test rows. A scikit-learn pipeline combines imputation, scaling, and Ridge regression. Validation selects alpha; held-out test metrics compare the selected model against a mean baseline.
+
+The saved pipeline has a manifest recording features, units, settings, metrics, package versions, and hashes. A separate FastAPI prediction service validates inputs and returns model versions. Optional local MLflow tracking requires a separate install.
+
+The app tracks six milestones: data, baseline, training, evaluation, deployment, and monitoring. Each level has an independent workspace, version-checked draft saves, and immutable accepted submission snapshots. Milestone feedback contributes to applied-practice history. “Requirements met” refers to rubric evidence in submitted text; the app does not execute the learner's code. Synthetic metrics demonstrate the workflow, not production quality.
+
+## Tech updates and API costs
+
+Sources: Python Insider, scikit-learn releases, MLflow releases, PyTorch, Hugging Face Transformers releases, and OpenAI News. The digest considers dated entries from the last 30 days and curates up to five items. Refresh is manual, cached, and rate limited; there is no scheduled daily job or exhaustive news coverage.
+
+| Action | OpenAI tokens |
+| --- | --- |
+| Browse lessons, history, projects, or cached updates | No |
+| Tutor, answer evaluation, question help, job analysis | Yes |
+| Refresh updates with AI off | No; official feed requests only |
+| Refresh with AI on | Yes when a new summary is needed; bounded and reused for unchanged content |
+| Automated tests and local ML training | No; tests inject model fixtures |
+
+Failures preserve useful cached content and display source status. AI output must match source IDs and evidence; this does not guarantee semantic accuracy. Saved items retain their snapshot after the digest changes. See [tech update details](docs/tech-updates.md).
+
+## Persistence and feedback
+
+SQLite stores the local learner, conversations, runs, attempts, preferences, reviewed job targets, project drafts/submissions, feedback flags, digests, and bookmarks. Catalog definitions include JSON payloads. Weak areas and review schedules are derived from accepted attempts rather than mutable mastery tables.
+
+Attempts are saved before evaluation. Retries retain the answer and ID, and accepted feedback is reused. The evaluator must cover all rubric criteria and supply matching answer quotations. Judgments are `met`, `partial`, `not_met`, or `insufficient_evidence`; deterministic scoring yields no score for insufficient evidence.
+
+Review groups separate skill, mode, module, submodule, and level. Current intervals are 1 day below score 50, 2 days for partial performance, and 4 days for fully correct performance. A later correct result on a distinct question after the required gap can extend this to 8 days. These are learning heuristics, not validated outcome measures.
+
+This is a **single-learner local MVP**. Authentication, formal schema migrations, production deployment, and cross-worker concurrency remain future work. AI features send relevant learner input and context to the configured provider. Environment files, databases/backups, generated model artifacts, and document previews are ignored by Git.
+
+## Verification
 
 ```powershell
-.\.venv\Scripts\python -m pytest
+.\.venv\Scripts\python -m pytest backend/tests -q
+node --test frontend/src/CoachMessage.test.js
 cd frontend
 npm run build
 ```
 
-The root pytest configuration supplies the backend import path.
+Latest completed checks: **91 backend tests passed** and the frontend production build passed, with a nonblocking Vite chunk-size warning. Coverage includes persistence, retry/evidence validation, curriculum, project workflows, example prediction parity, and feed/cache/error handling.
 
-Development requirements include the NumPy/pandas/scikit-learn dependencies used by the project and its checks. When using the older backend lock file instead of development requirements, also install `examples/ml_project/requirements.txt`. Project setup, milestone instructions and optional local MLflow tracking are in [the project README](examples/ml_project/README.md).
+The [feedback evaluation harness](evals/README.md) uses 20 synthetic development cases repeated twice, giving 80 criterion judgments. Rubric v2 matched 69/80 expected judgments; v3 matched 80/80 on the same development set. These are development regression results, not held-out accuracy, expert validation, or proven learning gains. Live evaluation runs consume OpenAI tokens.
 
-The API is local and single-user. Do not expose it publicly without authentication. Tables are created on startup for this initial schema; introduce migrations before evolving persisted learning records. The private GitHub remote is configured as origin.
+## Portfolio status and next steps
 
-## Structure
+The working MVP demonstrates a tool-assisted tutor, structured assessment validation, durable learning state, evidence-based revision rules, a reproducible small ML example, and source-aware ingestion. Resume descriptions should state those implemented behaviors and label synthetic development results accurately.
 
-- `backend/app`: API, validation, and profile persistence
-- `backend/tests`: persistence and validation checks
-- `frontend/src`: onboarding, dashboard, progress and styles
-- `docs`: architecture Word document and generation script
+Next priorities: an end-to-end demo and real learner feedback, independent held-out assessment evaluation, and deeper content in the active ML path. Deployment hardening and broader courses follow as needed.
 
-Next: expand reviewed evaluation examples, add richer applied exercises, and extend the curriculum.
+## Documentation
 
-## Lessons and tutor
+- [Architecture and implementation document](docs/Learning_Agent_Architecture.docx)
+- [Shared curriculum and migration notes](docs/shared-curriculum.md)
+- [Tech update behavior](docs/tech-updates.md)
+- [ML project starter](examples/ml_project/README.md)
+- [Feedback evaluation methodology](evals/README.md)
 
-Open **Learn** to choose one of three starter lessons: predictions, coefficients, or residuals. Lessons are available without a key. Tutor chats are saved in SQLite and resume through **Continue learning**. Informal chat does not update progress; submit an answer in Practice for scored feedback and revision dates.
-
-Set `OPENAI_API_KEY` in `backend/.env` and optionally `OPENAI_MODEL` (default: `gpt-4.1-mini`). Restart the backend after changing environment settings. The key is never sent to the browser. Tutor requests send the lesson, role, experience, study time, and recent conversation to OpenAI and incur API usage charges. No API requests are made merely by opening a lesson.
-
-The tutor uses LangChain `create_agent` with read-only `get_lesson` and `get_learning_profile` tools. Output tokens, tool steps, provider retries, and request timeouts are bounded. Provider errors are replaced with a generic retry message. Failed requests preserve the submitted text; retries use the same message identifier. This implementation uses a process-local lock and is intended for one local backend worker.
-
-Tests use an injected tutor response and do not contact OpenAI. `backend/requirements.lock.txt` records tested package versions; install it for a reproducible development environment.
-
-## Scored practice and revision
-
-The Practice view supports conceptual, applied, and interview explanation questions. Sixteen versioned questions cover linear regression plus starter Python, SQL, and classification interview skills. Rubrics and reference answers remain server-side until feedback is accepted. Interview answers include a clarity criterion; applied questions are written scenarios, not executed code.
-
-The evaluator returns structured criterion judgments, exact answer excerpts, strengths, gaps, and next steps. Python validates criterion coverage and evidence excerpts, then computes rubric points. Insufficient evidence is shown without a score and does not change the prior review schedule. Provider failures preserve the answer for an idempotent retry and never count as a learning failure.
-
-Progress separates conceptual understanding, practical application, and interview explanation. Weak areas from any mode guide question selection. Reviews are scheduled 1 day after a score below 50, 2 days after a partial result, and 4 days after an independent correct answer. A fresh correct question at least 4 days after another correct answer in the same dimension establishes initial demonstrated proficiency and an 8-day review. A gap resets that evidence sequence. These are initial heuristics, not validated mastery estimates; future releases can extend the schedule and evaluate grading consistency on a larger reviewed set.
-
-The database now has an additive `practice_attempts` table. Existing profiles and conversations are preserved. Accepted attempts retain the question and rubric snapshot, submitted answer, evaluator model, feedback and scheduling rule version. Progress and due dates are derived from accepted attempts; the database remains the source of truth across restarts. Reviews appear when the app opens; no proactive notifications are sent.
-
-Practice endpoints: `POST /api/v1/practice/start`, `GET /api/v1/practice/current`, `POST /api/v1/practice/{id}/submit`, `POST /api/v1/practice/{id}/discard`, and `GET /api/v1/progress`. The tutor receives saved weak-area summaries to personalize explanations. Informal chat is not automatically graded.
-
-## Commit conventions
-
-Use descriptive conventional commit messages: `feat(practice): ...`, `fix(tutor): ...`, `test(revision): ...`, and `docs(setup): ...`. Explain the user-visible change in the subject.
-
-
-## Continuous learning and focused help
-
-Topic practice starts from the linear regression module and keeps its conceptual or applied activity on Next question. There is no question limit. Switch activities inside the module, skip a question, or choose Finish for now. Active sessions resume after refresh, including accepted feedback. Starting from a lesson carries its skill into the first question.
-
-Role interview is a separate entry point spanning the starter ML, Python and SQL bank. The saved target role labels the session; this is a limited starter bank, not comprehensive role coverage or automatic job-description matching. Topic sessions cannot select questions outside their module.
-
-Finish for now saves a summary of answered and skipped questions, strengths, gaps encountered, covered skills and revision dates. Summaries and earlier question discussions remain accessible in Your progress. Repeated questions can appear after exhausting the finite bank.
-
-Help me understand this opens a focused discussion beside accepted feedback (below it on small screens). The model receives only that question, its submitted answer, reference and feedback, and its own discussion history. It has no learning-profile or other-question tools. Help never modifies the original score or review dates. Failed messages are retained for retry, and duplicate retries do not duplicate replies.
-
-Additive tables `learning_runs` and `question_discussions` preserve existing profiles, attempts and chats. Run membership is recorded in the attempt's question snapshot. The earlier pending single-question attempt is adopted when its mode matches a new run. This remains a local single-worker app; a shared deployment needs authentication, migrations, and cross-process concurrency controls.
-
-New endpoints include `/api/v1/runs/current`, `/runs/start`, `/runs/{id}/next`, `/runs/{id}/finish`, `/runs/history`, and GET/POST `/api/v1/practice/{id}/help` (all run routes also use the `/api/v1` prefix).
-
-
-## Curriculum and module levels
-
-Modules now groups the learning path into Python, machine learning, math and statistics, deep learning, AI and LLM applications, and ML engineering. Role suggestions use curated templates based on the target role in Learning profile. An actual job description is not analyzed yet. Planned curriculum entries are explicitly labeled and cannot start empty practice sessions.
-
-Four submodules have starter content at all three levels: Python functions, Python collections and iteration, linear regression, and model evaluation. The bank contains 14 short lessons and 38 questions, including fresh transfer questions. NumPy, pandas, broader supervised and unsupervised algorithms, deep learning, and other catalog entries remain planned. This is a usable curriculum foundation, not a complete course.
-
-Each module has its own beginner, intermediate, or advanced preference. Until explicitly chosen it inherits the profile experience level. Changing a level changes the lesson focus and question bank. For example, Python functions covers return values, safe defaults, or closure binding at the respective levels. Preferences do not assert mastery or change past scores.
-
-A new practice run snapshots its level and the module-level interview preferences. Changing preferences affects new runs without changing an active one. Topic runs stay within their submodule and level; role interviews combine banks at the chosen level for each module. Starting an explicit revision from progress may use the original question level. Existing profiles, lessons, attempts, and question discussions are retained.
-
-The additive tables are `module_preferences` and `run_preferences`. `GET /api/v1/curriculum` returns suggestions, prerequisites, available content and planned entries. `PUT /api/v1/curriculum/{module_id}/level` saves a preference. `GET /api/v1/lessons?submodule_id=...&level=...` retrieves the matching lessons. Content metadata uses stable module, submodule, level and lesson identifiers; the legacy unfiltered lesson endpoint remains compatible.
-
-Next priorities remain job-description mapping, a human-reviewed feedback evaluation set, and dated technology updates. None of those is represented as a completed feature. Source references for the starter concepts include the official Python tutorial at https://docs.python.org/3/tutorial/ and scikit-learn evaluation documentation at https://scikit-learn.org/stable/modules/cross_validation.html.
-
-## Submodule navigation
-
-Topic practice is entered from its submodule or lesson, not a separate sidebar destination. The selected submodule and level carry into practice without another submodule picker. Back to submodule returns to the matching curriculum section. Revision links enter the relevant practice directly; Role interview remains separate.
-
-
-## Job description learning priorities
-
-Job target lets you paste a description and title, then analyze explicit technical skills using OpenAI structured output. Every skill includes required, preferred or unspecified importance and an exact source excerpt. The extractor has one bounded repair attempt for invalid quotes; unsupported excerpts and duplicate names cannot be saved as valid analysis. The pasted description is sent to OpenAI only when analyzed; analysis may use a second call for evidence correction.
-
-Analysis creates a draft without changing your active path. Review skill names, change importance, remove irrelevant skills, or add missing skills with exact supporting excerpts. Save reviewed learning path to activate it. A new draft leaves the previous reviewed target active until saved. Use role defaults deactivates the target without deleting learning history or changing module levels. Job descriptions and reviews remain local in the ignored database.
-
-Modules shows available, planned and unmapped matches. Mapping uses curated aliases rather than an LLM inventing module identifiers. Required skills rank before unspecified and preferred skills; recorded weak areas raise priority within each importance group. Suggested prerequisites appear separately from extracted requirements. These are learning priorities, not hiring eligibility or a job-fit score. Broad skills can map to an entire module; available starter lessons do not imply comprehensive coverage.
-
-The additive `job_targets` table stores description, review state, extracted skills, model identifier and active selection. New endpoints are `GET /api/v1/jobs/current`, `POST /api/v1/jobs/analyze`, `PUT /api/v1/jobs/{id}/review`, and `POST /api/v1/jobs/clear`. Active recommendations are returned by `/api/v1/curriculum` and the dashboard. Live verification uses a fictional description and a temporary database; automated tests use an injected extractor.
-
-Job-description-driven interview question filtering, broader content coverage, feedback-quality benchmarking and sourced technology updates remain future work.
-
-
-## Feedback quality and learner flags
-
-Accepted feedback now offers Flag this feedback. Choose a reason and optionally describe what was missed. A local `feedback_flags` record preserves the original question, answer, feedback and evaluator model. Repeated saves update one report per attempt. Flagging never changes scores, weak areas or review dates and does not send a message to a human reviewer. Recorded flags appear in Your progress and remain editable from the assessed answer.
-
-Endpoints are `GET /api/v1/feedback/flags` and GET/PUT `/api/v1/practice/{id}/flag`. New accepted assessments record evaluator prompt and rubric versions. Existing attempts retain their original results.
-
-The development evaluation harness and baseline/refined reports are in `evals/`. It contains 20 synthetic answer cases, evaluated twice per run. The refined evaluator matched all reference judgments in that small run, compared with 69 of 80 criterion judgments at baseline. These are project-authored development labels, not independent human-reviewed or held-out accuracy results. See `evals/README.md` for definitions, limitations and the review workflow.
-# Shared role curriculum
-
-Modules now includes five role tracks, the full supplied roadmap and four starting levels, including Foundational. Set a subject level and optionally override individual topics. Existing learning history is preserved. New roadmap entries and project ladders are marked planned until their lessons and specifications are authored. See [the shared curriculum model and migration notes](docs/shared-curriculum.md).
-
-The first complete submodule is **Python → Variables and data types**, available at Beginner, Foundational, Intermediate and Advanced. It includes local runnable examples, exercises, mini-project rubrics, official reading links, and 16 concept/applied tasks. Submitted code receives feedback as text; the app does not execute it. Earlier lessons and progress remain available.
+`docs/build_design.py` generates the Word document using `python-docx`. Update that source before regenerating the document, then render and visually verify it.
