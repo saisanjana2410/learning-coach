@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import CoachMessage from './CoachMessage';
 import 'katex/dist/katex.min.css';
 
-export default function LearningWorkspace({ request, initialSession, onSession, onPractice }) {
+export default function LearningWorkspace({ request, initialSession, onSession, onPractice, selection }) {
   const [lessons, setLessons] = useState([]);
   const [session, setSession] = useState(null);
   const [status, setStatus] = useState(null);
@@ -15,9 +15,13 @@ export default function LearningWorkspace({ request, initialSession, onSession, 
   async function initialize() {
     setLoading(true); setError('');
     try {
-      const [content, tutor] = await Promise.all([request('/lessons'), request('/tutor/status')]);
+      const [content, tutor] = await Promise.all([request(selection ? `/lessons?submodule_id=${encodeURIComponent(selection.submoduleId)}&level=${selection.level}` : '/lessons'), request('/tutor/status')]);
       setLessons(content); setStatus(tutor);
-      if (initialSession) restore(await request(`/sessions/${initialSession.id}`));
+      if (selection?.lessonId) {
+        const existing=initialSession ? await request(`/sessions/${initialSession.id}`) : null;
+        if(existing?.lesson_id===selection.lessonId) restore(existing);
+        else restore(await request('/sessions',{method:'POST',body:JSON.stringify({lesson_id:selection.lessonId})}));
+      } else if (initialSession) restore(await request(`/sessions/${initialSession.id}`));
     } catch (e) { setError(e.message); } finally { setLoading(false); }
   }
   function restore(value) {
@@ -42,15 +46,15 @@ export default function LearningWorkspace({ request, initialSession, onSession, 
       setText('');
     } catch(e) { setError(e.message); } finally { setBusy(false); }
   }
-  return <><div className="intro"><p className="eyebrow">MACHINE LEARNING · LEARN MODE</p><h1>Start with understanding.</h1><p>Read a short lesson, explore an example, and ask your tutor a question.</p></div>
+  return <><div className="intro"><p className="eyebrow">{session?.lesson.module_id?.toUpperCase() || 'LEARNING'} · {session?.lesson.level || selection?.level || 'beginner'} · LEARN MODE</p><h1>Start with understanding.</h1><p>Read a short lesson, explore an example, and ask your tutor a question.</p></div>
     {loading ? <p role="status">Loading lessons…</p> : <>
       {!lessons.length && <button onClick={initialize}>Retry loading lessons</button>}
       <div className="lesson-tabs" aria-label="Lessons">{lessons.map((l,i) => <button key={l.id} disabled={busy} className={session?.lesson_id === l.id ? 'active' : ''} onClick={() => start(l)}><small>LESSON {i+1} · {l.minutes} MIN</small>{l.title}</button>)}</div>
       {!session ? <section className="card"><h2>Choose a lesson to begin</h2><p>Lessons are available without an API key. Your learning conversation is saved when you use the tutor.</p></section> : <div className="learning-grid">
-        <article className="card lesson"><span className="tag">{session.lesson.skill}</span><h2>{session.lesson.title}</h2>{session.lesson.sections.map(section => <section key={section.heading}><h3>{section.heading}</h3><p>{section.text}</p></section>)}<div className="takeaway"><strong>Remember</strong><p>{session.lesson.takeaway}</p><button className="primary" onClick={()=>onPractice(session.lesson.skill,'concept')}>Practice this concept →</button><button className="secondary" onClick={()=>onPractice(session.lesson.skill,'applied')}>Apply this concept →</button></div></article>
+        <article className="card lesson"><span className="tag">{session.lesson.skill}</span><h2>{session.lesson.title}</h2>{session.lesson.sections.map(section => <section key={section.heading}><h3>{section.heading}</h3><p>{section.text}</p></section>)}<div className="takeaway"><strong>Remember</strong><p>{session.lesson.takeaway}</p><button className="primary" onClick={()=>onPractice(session.lesson.skill,'concept',session.lesson.submodule_id)}>Practice this concept →</button><button className="secondary" onClick={()=>onPractice(session.lesson.skill,'applied',session.lesson.submodule_id)}>Apply this concept →</button></div></article>
         <section className="card tutor"><span className="eyebrow">YOUR LEARNING COMPANION</span><h2>Talk it through.</h2><p>Ask for another example or explain the idea in your own words. This conversation isn’t a scored assessment.</p>
           {status?.configured ? <p className="connection">● Tutor configured · OpenAI</p> : <p className="setup-note">To enable the tutor, add your key to <code>backend/.env</code> and restart the backend. Keep reading in the meantime.</p>}
-          <div className="messages" role="log" aria-live="polite">{session.messages.length === 0 && <p className="chat-empty">Try: “Explain the slope with a different example.”</p>}{session.messages.map(m => <div key={m.id} className={`message ${m.role}`}><strong className="message-author">{m.role === 'user' ? 'You' : 'Learning Coach'}</strong>{m.role === 'assistant' ? <CoachMessage content={m.content}/> : <p>{m.content}</p>}</div>)}</div>
+          <div className="messages" role="log" aria-live="polite">{session.messages.length === 0 && <p className="chat-empty">Try: “Explain this concept with a different example.”</p>}{session.messages.map(m => <div key={m.id} className={`message ${m.role}`}><strong className="message-author">{m.role === 'user' ? 'You' : 'Learning Coach'}</strong>{m.role === 'assistant' ? <CoachMessage content={m.content}/> : <p>{m.content}</p>}</div>)}</div>
           {busy && <p role="status">Working on your request…</p>}
           {error && <p className="error" role="alert">{error}</p>}
           <form onSubmit={send}><label htmlFor="tutor-question">Your question or explanation</label><textarea id="tutor-question" rows="4" maxLength="4000" value={pending?.text || text} disabled={busy || !!pending} onChange={e => setText(e.target.value)} placeholder="What would you like to understand?"/><button className="primary" disabled={busy || !status?.configured || (!pending && !text.trim())}>{busy ? 'Thinking…' : pending ? 'Retry saved message →' : 'Ask tutor →'}</button></form>

@@ -18,7 +18,8 @@ def test_continuous_topic_run_survives_refresh_and_finishes_with_summary(tmp_pat
         second=c.post(f'/api/v1/runs/{run_id}/next',json={'mode':'applied'}).json()
         assert second['attempt']['mode']=='applied'
         assert second['attempt']['id']!=a['id']
-        assert second['attempt']['question']['skill'] in ['Interpret coefficients','Make predictions','Understand residuals','Measure prediction error','Evaluate on unseen data']
+        assert second['attempt']['question']['submodule_id']=='linear-regression'
+        assert second['attempt']['question']['level']=='intermediate'
         summary=c.post(f'/api/v1/runs/{run_id}/finish').json()['summary']
         assert summary['answered']==1 and summary['skipped']==1
         assert len(summary['reviews'])==1

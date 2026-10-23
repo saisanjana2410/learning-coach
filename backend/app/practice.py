@@ -49,24 +49,33 @@ def summarize(db, now=None):
     rows=list(db.scalars(select(Attempt).where(Attempt.status=='accepted').order_by(Attempt.assessed_at)))
     dimensions={'concept':'Conceptual understanding','applied':'Practical application','interview':'Interview explanation'}
     progress=[]
-    for skill in SKILLS:
-        for mode,dimension in dimensions.items():
-            evidence=[r for r in rows if json.loads(r.question_json)['skill']==skill and r.mode==mode and json.loads(r.feedback_json)['score'] is not None]
-            if not evidence: continue
-            latest=evidence[-1]; feedback=json.loads(latest.feedback_json); points=feedback['score']
-            # A different question after a delay provides stronger retention evidence.
-            last_gap=max((i for i,r in enumerate(evidence[:-1]) if json.loads(r.feedback_json)['score']<100),default=-1)
-            independent=[r for r in evidence[last_gap+1:-1] if json.loads(r.feedback_json)['score']==100
-                         and json.loads(r.question_json)['id']!=json.loads(latest.question_json)['id']
-                         and datetime.fromisoformat(latest.assessed_at)-datetime.fromisoformat(r.assessed_at)>=timedelta(days=4)]
-            proficient=points==100 and bool(independent)
-            interval=1 if points<50 else 2 if points<100 else 8 if proficient else 4
-            due=datetime.fromisoformat(latest.assessed_at)+timedelta(days=interval)
-            progress.append({'skill':skill,'mode':mode,'dimension':dimension,'status':'demonstrated_proficiency' if proficient else 'needs_review' if points<100 else 'learning',
-                'score':points,'evidence_count':len(evidence),'gap':feedback['gap'] if points<100 else '',
-                'next_step':feedback['next_step'],'due_at':due.isoformat(),'due':due<=now,
-                'reason':f'{points}% on the latest {mode} answer; review after {interval} days.',
-                'lesson_id':json.loads(latest.question_json)['lesson_id']})
+    question_index={q['id']:q for q in QUESTIONS}
+    groups={}
+    for row in rows:
+        q=json.loads(row.question_json)
+        if json.loads(row.feedback_json)['score'] is None:continue
+        metadata={**question_index.get(q['id'],{}),**q}
+        identity=(q['skill'],row.mode,metadata.get('module_id'),metadata.get('submodule_id'),metadata.get('level'))
+        groups.setdefault(identity,[]).append(row)
+    for (skill,mode,module_id,submodule_id,level),evidence in groups.items():
+        dimension=dimensions[mode]
+        latest=evidence[-1]; feedback=json.loads(latest.feedback_json); points=feedback['score']
+        # A different question after a delay provides stronger retention evidence.
+        last_gap=max((i for i,r in enumerate(evidence[:-1]) if json.loads(r.feedback_json)['score']<100),default=-1)
+        independent=[r for r in evidence[last_gap+1:-1] if json.loads(r.feedback_json)['score']==100
+                     and json.loads(r.question_json)['id']!=json.loads(latest.question_json)['id']
+                     and datetime.fromisoformat(latest.assessed_at)-datetime.fromisoformat(r.assessed_at)>=timedelta(days=4)]
+        proficient=points==100 and bool(independent)
+        interval=1 if points<50 else 2 if points<100 else 8 if proficient else 4
+        due=datetime.fromisoformat(latest.assessed_at)+timedelta(days=interval)
+        stored_question=json.loads(latest.question_json)
+        metadata={**question_index.get(stored_question['id'],{}),**stored_question}
+        progress.append({'skill':skill,'mode':mode,'dimension':dimension,'status':'demonstrated_proficiency' if proficient else 'needs_review' if points<100 else 'learning',
+            'score':points,'evidence_count':len(evidence),'gap':feedback['gap'] if points<100 else '',
+            'next_step':feedback['next_step'],'due_at':due.isoformat(),'due':due<=now,
+            'reason':f'{points}% on the latest {mode} answer; review after {interval} days.',
+            'module_id':metadata.get('module_id'),'submodule_id':metadata.get('submodule_id'),'level':metadata.get('level'),
+            'lesson_id':json.loads(latest.question_json)['lesson_id']})
     return {'skills':progress,'assessed_skills':len({p['skill'] for p in progress}),
             'weak_areas':[p for p in progress if p['status']=='needs_review'],
             'due_reviews':sorted([p for p in progress if p['due']],key=lambda p:p['due_at']),
@@ -95,7 +104,12 @@ def make_router(db_session, evaluator_fn=None, help_fn=None):
         run=db.get(LearningRun,payload.run_id) if payload.run_id else None
         if payload.run_id and (not run or run.status!='active'):
             raise HTTPException(409,'Start or resume an active learning session.')
-        allowed=[q for q in QUESTIONS if not run or run.scope=='role' or q.get('topic_id','linear-regression')==run.topic_id]
+        from .curriculum import scoped_questions
+        from .curriculum_api import RunPreference
+        preference=db.get(RunPreference,run.id) if run else None
+        config=json.loads(preference.config_json) if preference else None
+        allowed=scoped_questions(run.topic_id if run.scope=='topic' else None,config['level'],config['module_levels'] if run.scope=='role' else None) if config else [q for q in QUESTIONS if not run or run.scope=='role' or q.get('topic_id','linear-regression')==run.topic_id]
+        if not allowed:raise HTTPException(422,'No reviewed questions are available at this level yet.')
         allowed_skills=list(dict.fromkeys(q['skill'] for q in allowed))
         chosen_skill=payload.skill
         if chosen_skill is None:

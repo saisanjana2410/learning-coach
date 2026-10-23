@@ -88,3 +88,18 @@ Help me understand this opens a focused discussion beside accepted feedback (bel
 Additive tables `learning_runs` and `question_discussions` preserve existing profiles, attempts and chats. Run membership is recorded in the attempt's question snapshot. The earlier pending single-question attempt is adopted when its mode matches a new run. This remains a local single-worker app; a shared deployment needs authentication, migrations, and cross-process concurrency controls.
 
 New endpoints include `/api/v1/runs/current`, `/runs/start`, `/runs/{id}/next`, `/runs/{id}/finish`, `/runs/history`, and GET/POST `/api/v1/practice/{id}/help` (all run routes also use the `/api/v1` prefix).
+
+
+## Curriculum and module levels
+
+Modules now groups the learning path into Python, machine learning, math and statistics, deep learning, AI and LLM applications, and ML engineering. Role suggestions use curated templates based on the target role in Learning profile. An actual job description is not analyzed yet. Planned curriculum entries are explicitly labeled and cannot start empty practice sessions.
+
+Four submodules have starter content at all three levels: Python functions, Python collections and iteration, linear regression, and model evaluation. The bank contains 14 short lessons and 38 questions, including fresh transfer questions. NumPy, pandas, broader supervised and unsupervised algorithms, deep learning, and other catalog entries remain planned. This is a usable curriculum foundation, not a complete course.
+
+Each module has its own beginner, intermediate, or advanced preference. Until explicitly chosen it inherits the profile experience level. Changing a level changes the lesson focus and question bank. For example, Python functions covers return values, safe defaults, or closure binding at the respective levels. Preferences do not assert mastery or change past scores.
+
+A new practice run snapshots its level and the module-level interview preferences. Changing preferences affects new runs without changing an active one. Topic runs stay within their submodule and level; role interviews combine banks at the chosen level for each module. Starting an explicit revision from progress may use the original question level. Existing profiles, lessons, attempts, and question discussions are retained.
+
+The additive tables are `module_preferences` and `run_preferences`. `GET /api/v1/curriculum` returns suggestions, prerequisites, available content and planned entries. `PUT /api/v1/curriculum/{module_id}/level` saves a preference. `GET /api/v1/lessons?submodule_id=...&level=...` retrieves the matching lessons. Content metadata uses stable module, submodule, level and lesson identifiers; the legacy unfiltered lesson endpoint remains compatible.
+
+Next priorities remain job-description mapping, a human-reviewed feedback evaluation set, and dated technology updates. None of those is represented as a completed feature. Source references for the starter concepts include the official Python tutorial at https://docs.python.org/3/tutorial/ and scikit-learn evaluation documentation at https://scikit-learn.org/stable/modules/cross_validation.html.

@@ -12,7 +12,7 @@ def configured():
 def tutor_reply(messages, learner, lesson):
     @tool
     def get_lesson(lesson_id: str) -> dict:
-        """Retrieve a reviewed linear regression lesson by its identifier."""
+        """Retrieve a curriculum lesson by its identifier."""
         return find_lesson(lesson_id) or {'error': 'Unknown lesson'}
 
     @tool
@@ -22,9 +22,9 @@ def tutor_reply(messages, learner, lesson):
 
     model = ChatOpenAI(model=os.getenv('OPENAI_MODEL', 'gpt-4.1-mini'), timeout=25, max_retries=0, max_tokens=900)
     agent = create_agent(model=model, tools=[get_lesson, get_learning_profile], system_prompt=(
-        'You are a patient ML tutor. Teach one concept at a time in plain text. '
+        'You are a patient technical tutor. Teach the current lesson subject at its specified level, one concept at a time. '
         'Use lesson and profile tools when useful. Include units and simple worked examples. '
-        'Ask at most one check-for-understanding question. Stay within ML foundations. '
+        'Ask at most one check-for-understanding question. Stay within the current lesson and its prerequisites. '
         'Use recorded weak areas from the profile to personalize explanations. '
         'Conversation is informal practice, not a scored assessment. Formal assessments '
         'and revision dates are saved only through the separate Practice view, not this chat. '

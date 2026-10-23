@@ -41,4 +41,4 @@ QUESTIONS.extend([
 ])
 
 def public_question(question):
-    return {k: question[k] for k in ('id','skill','lesson_id','prompt')}
+    return {k: question[k] for k in ('id','skill','lesson_id','prompt','module_id','submodule_id','level') if k in question}

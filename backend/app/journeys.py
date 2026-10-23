@@ -10,6 +10,8 @@ from sqlalchemy import String, Text, select
 from sqlalchemy.orm import Mapped, mapped_column
 from .main import Base, Learner, ChatInput
 from .practice import Attempt, serialize, summarize
+from .curriculum import SUBMODULES, LEVELS, question_metadata
+from .curriculum_api import RunPreference, module_levels
 
 # One local worker: shared lock prevents next/finish/submit from racing.
 practice_lock = RLock()
@@ -35,6 +37,7 @@ class RunInput(BaseModel):
     topic_id: str | None = 'linear-regression'
     mode: str = 'concept'
     skill: str | None = None
+    level: str | None = None
 
 def run_attempts(db, run_id):
     return [a for a in db.scalars(select(Attempt).order_by(Attempt.created_at))
@@ -43,7 +46,10 @@ def run_attempts(db, run_id):
 def run_data(db, run):
     attempts=run_attempts(db,run.id)
     current=attempts[-1] if attempts and attempts[-1].status!='discarded' else None
+    config=db.get(RunPreference,run.id)
+    config=json.loads(config.config_json) if config else {}
     return {'run':{'id':run.id,'scope':run.scope,'topic_id':run.topic_id,'role':run.role,
+                   'topic_title':SUBMODULES.get(run.topic_id,{}).get('title',run.topic_id),'level':config.get('level'),
                    'mode':run.mode,'status':run.status,'answered':sum(a.status=='accepted' for a in attempts)},
             'attempt':serialize(current) if current else None,
             'previous_attempts':[serialize(a) for a in attempts if a.status=='accepted' and (current is None or a.id!=current.id)],
@@ -75,8 +81,9 @@ def make_journey_router(db_session,start_question,help_fn=None):
             if not learner: raise HTTPException(409,'Create your learning profile first.')
             if payload.scope not in ('topic','role') or payload.mode not in ('concept','applied','interview'):
                 raise HTTPException(422,'Choose a supported scope and mode.')
-            if payload.scope=='topic' and (payload.topic_id!='linear-regression' or payload.mode=='interview'):
-                raise HTTPException(422,'Topic practice supports conceptual and applied linear regression.')
+            submodule=SUBMODULES.get(payload.topic_id)
+            if payload.scope=='topic' and (not submodule or not submodule['available'] or payload.mode=='interview'):
+                raise HTTPException(422,'Choose an available submodule for conceptual or applied practice.')
             if payload.scope=='role' and payload.mode!='interview':
                 raise HTTPException(422,'Role practice uses interview mode.')
             active=db.scalar(select(LearningRun).where(LearningRun.status=='active').limit(1))
@@ -84,11 +91,23 @@ def make_journey_router(db_session,start_question,help_fn=None):
             run=LearningRun(id=str(uuid4()),scope=payload.scope,topic_id=payload.topic_id if payload.scope=='topic' else None,
                             role=learner.target_role,mode=payload.mode,status='active',created_at=datetime.now(timezone.utc).isoformat())
             db.add(run);db.flush()
+            levels=module_levels(db)
+            level=levels.get(submodule['module_id'],'beginner') if submodule else learner.experience
+            if payload.level is not None:
+                if payload.level not in LEVELS:
+                    db.rollback();raise HTTPException(422,'Unknown learning level.')
+                level=payload.level
+                if run.scope=='role' and payload.skill:
+                    from .curriculum import module_for_skill
+                    match=module_for_skill(payload.skill)
+                    if match:levels[match['module_id']]=level
+            db.add(RunPreference(run_id=run.id,config_json=json.dumps({'level':level,'module_levels':levels})))
+            db.flush()
             # Adopt an unanswered question from the earlier single-question UI.
             legacy=db.scalar(select(Attempt).where(Attempt.status.in_(['awaiting_answer','failed'])).limit(1))
             if legacy:
                 q=json.loads(legacy.question_json)
-                if legacy.mode!=run.mode or (run.scope=='topic' and q.get('topic_id','linear-regression')!=run.topic_id):
+                if legacy.mode!=run.mode or (run.scope=='topic' and q.get('submodule_id',q.get('topic_id','linear-regression'))!=run.topic_id):
                     db.rollback();raise HTTPException(409,'An older question is waiting. Resume it in its original mode before starting this session.')
                 q['run_id']=run.id;legacy.question_json=json.dumps(q);db.commit()
             else:
@@ -121,8 +140,11 @@ def make_journey_router(db_session,start_question,help_fn=None):
             for a in attempts:
                 if a.status in ('awaiting_answer','failed'): a.status='discarded'
             accepted=[a for a in attempts if a.status=='accepted']
-            touched={(json.loads(a.question_json)['skill'],a.mode) for a in accepted}
-            review=[s for s in summarize(db)['upcoming_reviews'] if (s['skill'],s['mode']) in touched]
+            touched=set()
+            for a in accepted:
+                q=question_metadata(json.loads(a.question_json))
+                touched.add((q['skill'],a.mode,q.get('submodule_id'),q.get('level')))
+            review=[s for s in summarize(db)['upcoming_reviews'] if (s['skill'],s['mode'],s['submodule_id'],s['level']) in touched]
             run.summary_json=json.dumps({'answered':len(accepted),'skipped':sum(a.status=='discarded' for a in attempts),
                 'covered_skills':sorted({json.loads(a.question_json)['skill'] for a in accepted}),
                 'strengths':[{'skill':json.loads(a.question_json)['skill'],'text':json.loads(a.feedback_json)['strengths']} for a in accepted if json.loads(a.feedback_json)['score'] is not None and json.loads(a.feedback_json)['score']>0],
