@@ -2,6 +2,8 @@
 
 A personal learning and interview preparation agent. The application provides a React dashboard, persistent profiles and tutor conversations, rubric-based practice, weak-area tracking, and revision dates through FastAPI and SQLite.
 
+The current release focuses on **Python for ML → MLOps basics → a guided delivery-time prediction project**. All other modules remain visible as **Coming soon**, with earlier starter lessons still accessible. The focused path includes 12 authored lessons and 48 assessment tasks across four levels, plus a downloadable runnable project kit. Reading lessons and running the local project do not use OpenAI API tokens; tutor chats and answer feedback do.
+
 ## Run locally
 
 Use Python 3.11 or newer and Node.js 22.12 or newer.
@@ -36,6 +38,8 @@ npm run build
 ```
 
 The root pytest configuration supplies the backend import path.
+
+Development requirements include the NumPy/pandas/scikit-learn dependencies used by the project and its checks. When using the older backend lock file instead of development requirements, also install `examples/ml_project/requirements.txt`. Project setup, milestone instructions and optional local MLflow tracking are in [the project README](examples/ml_project/README.md).
 
 The API is local and single-user. Do not expose it publicly without authentication. Tables are created on startup for this initial schema; introduce migrations before evolving persisted learning records. The private GitHub remote is configured as origin.
 

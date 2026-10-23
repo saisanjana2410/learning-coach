@@ -1,5 +1,15 @@
 # Shared curriculum: first migration
 
+## Current release scope
+
+The active release is Python for ML, MLOps basics and a guided delivery-time prediction project. Other modules remain visible with a Coming soon label; earlier starter lessons remain available rather than removing existing learning paths or evidence. The full supplied role outlines remain accessible in a collapsed roadmap.
+
+Three focused submodules each have four authored levels and four assessment tasks per level: two conceptual questions and two practical tasks. This adds 12 lessons and 48 tasks. The additive `focused-ml-path-v1` migration stores the new topics, content versions and skill links without rewriting learner history. A starting preference still does not claim mastery.
+
+The downloadable project kit contains local synthetic-data training, a baseline comparison, train/validation/test selection, a saved pipeline and versioned manifest, a validated FastAPI endpoint and optional local MLflow logging. Training and serving require no external API calls. Learner code is not executed by Learning Coach; applied submissions receive text-based rubric feedback. `GET /api/v1/projects/delivery-time/starter.zip` streams only the checked-in starter files, excluding model artifacts, databases and credentials.
+
+The experimental all-topic generator has not been integrated or activated. Lesson reading and local project runs make no OpenAI calls; tutor chats and assessment feedback retain their existing API use.
+
 The catalog supports AI Engineer, React Frontend Developer, Python Developer, GenAI Engineer and MERN Full Stack Developer. The supplied source is retained in `backend/app/catalog/role_tracks.txt`: 60 role sections, 300 original topic entries and 20 proposed projects. Compound entries can reference several canonical topics; repeated entries share an identity. Existing lesson and question IDs are preserved.
 
 ## Learner flow

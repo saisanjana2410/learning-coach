@@ -13,3 +13,4 @@ docs/qa/
 .DS_Store
 *.log
 backend/backups/
+examples/ml_project/artifacts/

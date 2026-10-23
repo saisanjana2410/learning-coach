@@ -139,3 +139,35 @@ def seed_python_basics(db):
     row.payload=json.dumps(payload)
     db.add(SchemaMigration(id=VERSION,applied_at=datetime.now(timezone.utc).isoformat()))
     db.commit()
+
+
+def seed_focused_ml(db):
+    from .focused_ml import VERSION, TOPICS
+    from .curriculum import MODULES, SUBMODULES, LESSONS, QUESTIONS, TRACK_CATALOG
+    from .track_catalog import slug
+    if db.get(SchemaMigration,VERSION):return
+    ids={sid for sid,_,_ in TOPICS}
+    for m in MODULES:
+        row=db.get(CatalogModule,m['id'])
+        if row:
+            payload=json.loads(row.payload);payload.update(m);row.payload=json.dumps(payload)
+        else:db.add(CatalogModule(id=m['id'],payload=json.dumps(m)))
+    db.flush()
+    for sid in ids:
+        if not db.get(CatalogTopic,sid):db.add(CatalogTopic(id=sid,module_id=SUBMODULES[sid]['module_id'],payload=json.dumps(SUBMODULES[sid])))
+    db.flush()
+    for link in TRACK_CATALOG['role_topics']:
+        if link['topic_id'] in ids and not db.get(RoleTopic,(link['role_id'],link['topic_id'])):
+            db.add(RoleTopic(role_id=link['role_id'],topic_id=link['topic_id'],importance=link['importance'],recommended_order=link['recommended_order'],payload=json.dumps(link)))
+    for kind,items in [('lesson',LESSONS),('assessment',QUESTIONS)]:
+        for item in items:
+            if item['submodule_id'] not in ids:continue
+            key=f'{kind}:{item["id"]}@{item.get("version",1)}'
+            if not db.get(ContentVersion,key):db.add(ContentVersion(id=key,kind=kind,topic_id=item['submodule_id'],payload=json.dumps(item)))
+    for q in QUESTIONS:
+        if q['submodule_id'] not in ids:continue
+        skill_id=q['submodule_id']+':'+slug(q['skill'])
+        if not db.get(CatalogSkill,skill_id):db.add(CatalogSkill(id=skill_id,title=q['skill']));db.flush()
+        if not db.get(TopicSkill,(q['submodule_id'],skill_id)):db.add(TopicSkill(topic_id=q['submodule_id'],skill_id=skill_id));db.flush()
+    db.add(SchemaMigration(id=VERSION,applied_at=datetime.now(timezone.utc).isoformat()))
+    db.commit()

@@ -71,7 +71,7 @@ def test_catalog_seed_is_idempotent_and_preserves_accepted_evidence(tmp_path):
         assert updated['track']['title']=='Python Developer'
     with sqlite3.connect(path) as db:
         assert db.execute('select count(*) from catalog_roles').fetchone()[0]==5
-        assert db.execute('select count(*) from schema_migrations').fetchone()[0]==2
+        assert db.execute('select count(*) from schema_migrations').fetchone()[0]==3
         assert db.execute('select count(*) from catalog_projects').fetchone()[0]==20
         assert db.execute('select question_json,answer,feedback_json from practice_attempts where id=?',(aid,)).fetchone()==evidence
 

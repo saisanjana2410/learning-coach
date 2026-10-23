@@ -10,6 +10,7 @@ from .curriculum import MODULES, SUBMODULES, LEVELS, role_path, TRACK_CATALOG
 from .content import LESSONS
 from .catalog_models import TopicPreference
 from .track_catalog import resolve_role, LEVEL_DESCRIPTIONS
+from .focused_ml import FOCUS_MODULES
 
 class ModulePreference(Base):
     __tablename__='module_preferences'
@@ -43,6 +44,7 @@ def topic_levels(db):
 def catalog(db):
     learner=db.get(Learner,1);role=learner.target_role if learner else 'AI/ML Engineer'
     path,label=role_path(role);levels=module_levels(db);topics=topic_levels(db)
+    path=FOCUS_MODULES;label='Python → MLOps → guided ML project'
     role_id=resolve_role(role)
     track=next((r for r in TRACK_CATALOG['roles'] if r['id']==role_id),None)
     relevant={r['topic_id'] for r in TRACK_CATALOG['role_topics'] if r['role_id']==role_id}
@@ -57,6 +59,7 @@ def catalog(db):
                      if l['submodule_id']==sid and l['level']==selected_level]
             submodules.append({**SUBMODULES[sid],'level':selected_level,'level_source':'topic' if sid in overrides else 'module','relevant_to_role':sid in relevant,'available_levels':list(dict.fromkeys(l['level'] for l in LESSONS if l['submodule_id']==sid)),'id':sid,'title':title,'status':'available' if lessons else 'planned','lessons':lessons})
         modules.append({**{k:v for k,v in m.items() if k!='submodules'},'level':level,'recommended':m['id'] in path,
+                        'release_status':'active' if m['id'] in FOCUS_MODULES else 'coming_soon',
                         'suggested_order':path.index(m['id'])+1 if m['id'] in path else None,'submodules':submodules})
     from .jobs import active_job,recommendations
     active=active_job(db)
@@ -84,7 +87,11 @@ def catalog(db):
         source='Reviewed job description skills, mapped using curated aliases. Prerequisites are separate suggestions.'
     return {'role':role,'path_label':label,'recommendation_source':source,'job_plan':job_plan,
             'track':track,'roles':[{'id':r['id'],'title':r['title']} for r in TRACK_CATALOG['roles']],
-            'level_descriptions':LEVEL_DESCRIPTIONS,'levels':LEVELS,'modules':sorted(modules,key=lambda m:m['suggested_order'] or 99),
+            'focus':{'title':'ML first release','module_ids':FOCUS_MODULES,
+                'description':'Start with Python for ML, learn MLOps basics, and connect them through one delivery-time prediction project. Other modules are coming soon; earlier starter lessons remain accessible.',
+                'project_download':'/api/v1/projects/delivery-time/starter.zip',
+                'milestones':['Prepare ordered features and targets','Establish a mean baseline and held-out MAE','Fit preprocessing and select a model on validation data','Save the fitted pipeline and experiment manifest','Serve validated predictions and verify offline/API parity','Define monitoring signals and a compatible rollback']},
+            'level_descriptions':LEVEL_DESCRIPTIONS,'levels':LEVELS,'modules':sorted(modules,key=lambda m:(0,FOCUS_MODULES.index(m['id'])) if m['id'] in FOCUS_MODULES else (1,m['suggested_order'] or 99)),
             'roadmap':['Feedback quality evaluation set','Dated technology updates']}
 
 def make_curriculum_router(db_session):

@@ -164,6 +164,8 @@ from .track_catalog import build_track_catalog, resolve_role
 TRACK_CATALOG=build_track_catalog(MODULES,SUBMODULES)
 from .python_basics import install as install_python_basics
 install_python_basics(MODULES,SUBMODULES,LESSONS,QUESTIONS)
+from .focused_ml import install as install_focused_ml
+install_focused_ml(MODULES,SUBMODULES,LESSONS,QUESTIONS,TRACK_CATALOG)
 
 def role_path(role):
     role_id=resolve_role(role)

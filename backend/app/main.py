@@ -86,7 +86,7 @@ def create_app(database_url=None, tutor_fn=None, evaluator_fn=None, help_fn=None
 
     @asynccontextmanager
     async def lifespan(app):
-        from .catalog_models import seed_catalog, seed_python_basics
+        from .catalog_models import seed_catalog, seed_python_basics, seed_focused_ml
         # Keep a local recovery copy before the first additive catalog migration.
         if database_url is None and engine.url.drivername=='sqlite' and engine.url.database:
             import sqlite3
@@ -103,6 +103,7 @@ def create_app(database_url=None, tutor_fn=None, evaluator_fn=None, help_fn=None
         with Session(engine) as db:
             seed_catalog(db)
             seed_python_basics(db)
+            seed_focused_ml(db)
         yield
         engine.dispose()
 
@@ -129,6 +130,19 @@ def create_app(database_url=None, tutor_fn=None, evaluator_fn=None, help_fn=None
     @api.get('/api/v1/health')
     def health():
         return {'status': 'ok'}
+
+    @api.get('/api/v1/projects/delivery-time/starter.zip')
+    def download_project():
+        from io import BytesIO
+        from zipfile import ZipFile, ZIP_DEFLATED
+        from fastapi.responses import StreamingResponse
+        folder=BASE.parent/'examples'/'ml_project'
+        buffer=BytesIO()
+        with ZipFile(buffer,'w',ZIP_DEFLATED) as archive:
+            for name in ('README.md','requirements.txt','train.py','serve.py'):
+                archive.write(folder/name,arcname='delivery_time_project/'+name)
+        buffer.seek(0)
+        return StreamingResponse(buffer,media_type='application/zip',headers={'Content-Disposition':'attachment; filename="delivery_time_project.zip"'})
 
     @api.get('/api/v1/profile', response_model=Profile | None)
     def profile(db: Session = Depends(db_session)):
