@@ -10,6 +10,24 @@ The downloadable project kit contains local synthetic-data training, a baseline 
 
 The experimental all-topic generator has not been integrated or activated. Lesson reading and local project runs make no OpenAI calls; tutor chats and assessment feedback retain their existing API use.
 
+### Saved guided-project work
+
+The Guided project view adds a workspace per learner/project/level, persisted in `project_workspaces`. `project_milestone_drafts` stores draft text with an optimistic version to reject stale-tab overwrites. `project_milestone_submissions` links an idempotent client submission ID to an immutable existing `practice_attempts` record. Tables are added on startup without modifying existing learner records or accepted evidence.
+
+The six milestone definitions supply level-specific framing, visible rubrics and advanced release checks. Each links to an existing Python for ML, ML project or MLOps lesson at the workspace's frozen level. Saved feedback uses those existing skill/topic identities, so gaps participate in the established applied-practice revision logic. Missing/uncertain evidence does not complete a milestone. Only a 100% score across all rubric criteria in the latest accepted submission produces “Requirements met”; there is no independent mastery or code-execution claim.
+
+Draft save and workspace navigation do not call OpenAI. Feedback requests do. Failed evaluations preserve the submitted answer for exact retry; cancelling a pending evaluation retains its history. Repeating an already accepted request is idempotent, and submitting identical accepted work under a new ID is rejected before making a model call. Project pending work is excluded from ordinary practice's pending-question selection so it is not accidentally adopted as a learning-session question.
+
+Endpoints under `/api/v1/projects/delivery-time`:
+
+- `GET` returns the most recently used workspace and resume point, or available levels before the first start.
+- `POST /start` opens or resumes the requested level's separate workspace.
+- `GET /workspaces/{workspace_id}` retrieves a specific workspace without switching to another level's most recently used work.
+- `PUT /{workspace_id}/milestones/{milestone_id}/draft` saves text with its expected draft version.
+- `POST /{workspace_id}/milestones/{milestone_id}/submit` requests feedback with a stable submission ID and answer.
+
+Feedback flags, question-specific discussions and cancelling pending evaluations reuse the existing practice endpoints. Drafts are saved explicitly or when selecting a different milestone; the UI identifies unsaved changes before leaving or switching levels.
+
 The catalog supports AI Engineer, React Frontend Developer, Python Developer, GenAI Engineer and MERN Full Stack Developer. The supplied source is retained in `backend/app/catalog/role_tracks.txt`: 60 role sections, 300 original topic entries and 20 proposed projects. Compound entries can reference several canonical topics; repeated entries share an identity. Existing lesson and question IDs are preserved.
 
 ## Learner flow

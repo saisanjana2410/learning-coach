@@ -4,6 +4,8 @@ A personal learning and interview preparation agent. The application provides a 
 
 The current release focuses on **Python for ML → MLOps basics → a guided delivery-time prediction project**. All other modules remain visible as **Coming soon**, with earlier starter lessons still accessible. The focused path includes 12 authored lessons and 48 assessment tasks across four levels, plus a downloadable runnable project kit. Reading lessons and running the local project do not use OpenAI API tokens; tutor chats and answer feedback do.
 
+Open **Guided project** to save milestone drafts and resume your work. Each level has its own workspace with six milestones: data, baseline, training, evaluation, deployment and monitoring. Save drafts locally without an API call; request feedback when ready. Submitted versions remain immutable, retries reuse saved answers, and feedback contributes to the existing weak-area/revision tracker with links to relevant lessons. Save before leaving the workspace; moving between milestones saves changes to the current draft. A milestone meets requirements only when its latest accepted feedback meets every rubric criterion. This is AI review of submitted text, not code execution or a mastery certificate.
+
 ## Run locally
 
 Use Python 3.11 or newer and Node.js 22.12 or newer.

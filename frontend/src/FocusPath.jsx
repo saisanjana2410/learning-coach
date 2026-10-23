@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function FocusPath({catalog,onLesson,onPractice}){
+export default function FocusPath({catalog,onLesson,onPractice,onProject}){
  const focus=catalog.focus;
  if(!focus)return null;
  const topics=focus.module_ids.map(id=>catalog.modules.find(m=>m.id===id)).filter(Boolean)
@@ -13,6 +13,7 @@ export default function FocusPath({catalog,onLesson,onPractice}){
    {s.lessons.map(l=><button className="primary" key={l.id} onClick={()=>onLesson({submoduleId:s.id,moduleId:m.id,level:s.level,lessonId:l.id})}>Start lesson →</button>)}
    <button className="secondary" onClick={()=>onPractice(null,'concept',s.id,s.level)}>Practice →</button>
   </div>)}</div>
+  <button className="primary" onClick={onProject}>Open saved project workspace →</button>
   <details><summary>Guided project milestones and starter files</summary>
    <p>Build a delivery-time prediction service locally. This kit uses synthetic data and makes no external API calls.</p>
    <ol>{focus.milestones.map(step=><li key={step}>{step}</li>)}</ol>

@@ -82,6 +82,27 @@ def summarize(db, now=None):
             'upcoming_reviews':sorted(progress,key=lambda p:p['due_at']),
             'recent_attempts':[serialize(r) for r in rows[-10:][::-1]]}
 
+def assess_attempt(db,row,answer,evaluator_fn=None):
+    if row.status=='discarded': raise HTTPException(409,'This attempt was discarded.')
+    if row.answer is not None and row.answer!=answer: raise HTTPException(409,'Retry the saved answer or start a new question.')
+    if row.status=='accepted': return serialize(row)
+    if not os.getenv('OPENAI_API_KEY') and evaluator_fn is None: raise HTTPException(503,'Configure the backend OpenAI key to evaluate answers.')
+    row.answer=answer; row.status='failed'; db.commit()
+    question=json.loads(row.question_json)
+    try:
+        value=(evaluator_fn or evaluate_answer)(question,answer)
+        evaluation=validate_evaluation(value,question,answer)
+    except Exception:
+        raise HTTPException(502,'Assessment could not finish. Your answer is saved; retry without changing it.') from None
+    result=evaluation.model_dump(); result['score']=score(evaluation)
+    result['reference']=question['reference']; result['rule_version']='revision-v1'
+    result['evaluator_prompt_version']=EVALUATOR_PROMPT_VERSION if evaluator_fn is None else 'test-evaluator'
+    result['rubric_version']=question.get('version',1)
+    row.feedback_json=json.dumps(result); row.assessed_at=datetime.now(timezone.utc).isoformat()
+    row.model=os.getenv('OPENAI_MODEL','gpt-4.1-mini') if evaluator_fn is None else 'test-evaluator'
+    row.status='accepted'; db.commit()
+    return serialize(row)
+
 def make_router(db_session, evaluator_fn=None, help_fn=None):
     from .journeys import LearningRun, make_journey_router, practice_lock
     router=APIRouter(prefix='/api/v1'); lock=practice_lock
@@ -92,13 +113,13 @@ def make_router(db_session, evaluator_fn=None, help_fn=None):
 
     @router.get('/practice/current')
     def current(db=Depends(db_session)):
-        row=db.scalar(select(Attempt).where(Attempt.status.in_(['awaiting_answer','failed'])).order_by(Attempt.created_at.desc()).limit(1))
+        row=db.scalar(select(Attempt).where(Attempt.status.in_(['awaiting_answer','failed']),Attempt.question_json.not_like('%"project_workspace_id"%')).order_by(Attempt.created_at.desc()).limit(1))
         return serialize(row) if row else None
 
     @router.post('/practice/start')
     def start(payload:Start,db=Depends(db_session)):
         if not db.get(Learner,1): raise HTTPException(409,'Create your profile first.')
-        pending=db.scalar(select(Attempt).where(Attempt.status.in_(['awaiting_answer','failed'])).limit(1))
+        pending=db.scalar(select(Attempt).where(Attempt.status.in_(['awaiting_answer','failed']),Attempt.question_json.not_like('%"project_workspace_id"%')).limit(1))
         if pending: raise HTTPException(409,'Finish or discard the current question first.')
         summary=summarize(db)
         run=db.get(LearningRun,payload.run_id) if payload.run_id else None
@@ -149,25 +170,7 @@ def make_router(db_session, evaluator_fn=None, help_fn=None):
         try:
             row=db.get(Attempt,attempt_id)
             if not row: raise HTTPException(404,'Attempt not found.')
-            if row.status=='discarded': raise HTTPException(409,'This attempt was discarded.')
-            if row.answer is not None and row.answer!=payload.answer: raise HTTPException(409,'Retry the saved answer or start a new question.')
-            if row.status=='accepted': return serialize(row)
-            if not os.getenv('OPENAI_API_KEY') and evaluator_fn is None: raise HTTPException(503,'Configure the backend OpenAI key to evaluate answers.')
-            row.answer=payload.answer; row.status='failed'; db.commit()
-            question=json.loads(row.question_json)
-            try:
-                value=(evaluator_fn or evaluate_answer)(question,payload.answer)
-                evaluation=validate_evaluation(value,question,payload.answer)
-            except Exception:
-                raise HTTPException(502,'Assessment could not finish. Your answer is saved; retry without changing it.') from None
-            result=evaluation.model_dump(); result['score']=score(evaluation)
-            result['reference']=question['reference']; result['rule_version']='revision-v1'
-            result['evaluator_prompt_version']=EVALUATOR_PROMPT_VERSION if evaluator_fn is None else 'test-evaluator'
-            result['rubric_version']=question.get('version',1)
-            row.feedback_json=json.dumps(result); row.assessed_at=datetime.now(timezone.utc).isoformat()
-            row.model=os.getenv('OPENAI_MODEL','gpt-4.1-mini') if evaluator_fn is None else 'test-evaluator'
-            row.status='accepted'; db.commit()
-            return serialize(row)
+            return assess_attempt(db,row,payload.answer,evaluator_fn)
         finally: lock.release()
     router.include_router(make_journey_router(db_session,start,help_fn))
     return router

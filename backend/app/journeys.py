@@ -113,7 +113,7 @@ def make_journey_router(db_session,start_question,help_fn=None):
             db.add(RunPreference(run_id=run.id,config_json=json.dumps(config)))
             db.flush()
             # Adopt an unanswered question from the earlier single-question UI.
-            legacy=db.scalar(select(Attempt).where(Attempt.status.in_(['awaiting_answer','failed'])).limit(1))
+            legacy=db.scalar(select(Attempt).where(Attempt.status.in_(['awaiting_answer','failed']),Attempt.question_json.not_like('%"project_workspace_id"%')).limit(1))
             if legacy:
                 q=json.loads(legacy.question_json)
                 if legacy.mode!=run.mode or (run.scope=='topic' and q.get('submodule_id',q.get('topic_id','linear-regression'))!=run.topic_id):

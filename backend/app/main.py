@@ -122,6 +122,8 @@ def create_app(database_url=None, tutor_fn=None, evaluator_fn=None, help_fn=None
     from .curriculum_api import make_curriculum_router
     api.include_router(make_curriculum_router(db_session))
     api.include_router(make_router(db_session, evaluator_fn, help_fn))
+    from .project_workspace import make_project_router
+    api.include_router(make_project_router(db_session,evaluator_fn))
     from .jobs import make_job_router
     api.include_router(make_job_router(db_session,job_extractor_fn))
     from .feedback_flags import make_flag_router
