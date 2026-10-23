@@ -12,5 +12,33 @@ QUESTIONS = [
     {'id':'evaluation-fresh','skill':'Evaluate on unseen data','lesson_id':'residuals','prompt':'A developer scales the entire dataset before splitting train and test data, then reports test error. What is wrong and how would you fix the process?','hint':'Ask which observations influenced the scaler before splitting.','criteria':['generalization','leakage'],'reference':'The held-out data influenced preprocessing, causing leakage. Split first, fit scaler on train only, transform test, and evaluate without tuning on the final test set.'},
 ]
 
+# The role interview spans several starter domains. Topic practice remains scoped.
+QUESTIONS.extend([
+    {'id':'python-mutable','topic_id':'python','skill':'Python data handling','lesson_id':'predictions',
+     'prompt':'Why is a mutable list a risky default argument in a Python function? Explain a safer pattern.',
+     'hint':'Think about when default arguments are evaluated.','criteria':['shared_state','safe_default'],
+     'reference':'Defaults are evaluated once when the function is defined, so calls share and mutate the same list. Use None as the default and create a new list inside the function when the argument is None.'},
+    {'id':'python-copy','topic_id':'python','skill':'Python data handling','lesson_id':'predictions',
+     'prompt':'How do shallow and deep copies differ for a nested Python list, and why does this matter when preparing data?',
+     'hint':'Consider whether inner objects are shared.','criteria':['nested_objects','consequence'],
+     'reference':'A shallow copy creates a new outer list but shares inner objects; a deep copy recursively copies nested objects. Mutating a shared nested list can unexpectedly alter the original data.'},
+    {'id':'sql-group','topic_id':'sql','skill':'SQL aggregation','lesson_id':'residuals',
+     'prompt':'Explain WHERE versus HAVING when counting orders per customer. How would you keep only customers with more than five orders?',
+     'hint':'One filter operates before grouping, one after.','criteria':['filter_stage','group_filter'],
+     'reference':'WHERE filters rows before grouping. HAVING filters groups after aggregation. GROUP BY customer_id HAVING COUNT(*) > 5 keeps customers with more than five orders.'},
+    {'id':'sql-count','topic_id':'sql','skill':'SQL aggregation','lesson_id':'residuals',
+     'prompt':'How do COUNT(*) and COUNT(column) differ when column values can be NULL? Give an example.',
+     'hint':'Consider which rows are counted.','criteria':['null_handling','example'],
+     'reference':'COUNT(*) counts every row, while COUNT(column) counts only non-NULL values. For values 1, NULL, 2 the counts are 3 and 2 respectively.'},
+    {'id':'classification-imbalance','topic_id':'ml-foundations','skill':'Classification metrics','lesson_id':'residuals',
+     'prompt':'Why can accuracy mislead when only 1% of examples are positive? Explain which other metrics you would inspect.',
+     'hint':'Consider a model that always predicts negative.','criteria':['baseline','metrics'],
+     'reference':'Always predicting negative achieves 99% accuracy but zero positive recall. Inspect precision, recall, confusion matrix and metrics such as PR AUC depending on the cost of false positives and negatives.'},
+    {'id':'classification-tradeoff','topic_id':'ml-foundations','skill':'Classification metrics','lesson_id':'residuals',
+     'prompt':'Define precision and recall for a positive class and explain a practical tradeoff when changing the decision threshold.',
+     'hint':'Distinguish predicted positives from actual positives.','criteria':['definitions','tradeoff'],
+     'reference':'Precision is TP/(TP+FP); recall is TP/(TP+FN). Lowering a decision threshold usually increases recall while potentially lowering precision by admitting more false positives. Choose the operating point based on error costs.'},
+])
+
 def public_question(question):
     return {k: question[k] for k in ('id','skill','lesson_id','prompt')}

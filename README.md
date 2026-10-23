@@ -60,7 +60,7 @@ Tests use an injected tutor response and do not contact OpenAI. `backend/require
 
 ## Scored practice and revision
 
-The Practice view supports conceptual, applied, and interview explanation questions. Ten versioned questions cover five starter skills. Rubrics and reference answers remain server-side until feedback is accepted. Interview answers include a clarity criterion; applied questions are written scenarios, not executed code.
+The Practice view supports conceptual, applied, and interview explanation questions. Sixteen versioned questions cover linear regression plus starter Python, SQL, and classification interview skills. Rubrics and reference answers remain server-side until feedback is accepted. Interview answers include a clarity criterion; applied questions are written scenarios, not executed code.
 
 The evaluator returns structured criterion judgments, exact answer excerpts, strengths, gaps, and next steps. Python validates criterion coverage and evidence excerpts, then computes rubric points. Insufficient evidence is shown without a score and does not change the prior review schedule. Provider failures preserve the answer for an idempotent retry and never count as a learning failure.
 
@@ -73,3 +73,18 @@ Practice endpoints: `POST /api/v1/practice/start`, `GET /api/v1/practice/current
 ## Commit conventions
 
 Use descriptive conventional commit messages: `feat(practice): ...`, `fix(tutor): ...`, `test(revision): ...`, and `docs(setup): ...`. Explain the user-visible change in the subject.
+
+
+## Continuous learning and focused help
+
+Topic practice starts from the linear regression module and keeps its conceptual or applied activity on Next question. There is no question limit. Switch activities inside the module, skip a question, or choose Finish for now. Active sessions resume after refresh, including accepted feedback. Starting from a lesson carries its skill into the first question.
+
+Role interview is a separate entry point spanning the starter ML, Python and SQL bank. The saved target role labels the session; this is a limited starter bank, not comprehensive role coverage or automatic job-description matching. Topic sessions cannot select questions outside their module.
+
+Finish for now saves a summary of answered and skipped questions, strengths, gaps encountered, covered skills and revision dates. Summaries and earlier question discussions remain accessible in Your progress. Repeated questions can appear after exhausting the finite bank.
+
+Help me understand this opens a focused discussion beside accepted feedback (below it on small screens). The model receives only that question, its submitted answer, reference and feedback, and its own discussion history. It has no learning-profile or other-question tools. Help never modifies the original score or review dates. Failed messages are retained for retry, and duplicate retries do not duplicate replies.
+
+Additive tables `learning_runs` and `question_discussions` preserve existing profiles, attempts and chats. Run membership is recorded in the attempt's question snapshot. The earlier pending single-question attempt is adopted when its mode matches a new run. This remains a local single-worker app; a shared deployment needs authentication, migrations, and cross-process concurrency controls.
+
+New endpoints include `/api/v1/runs/current`, `/runs/start`, `/runs/{id}/next`, `/runs/{id}/finish`, `/runs/history`, and GET/POST `/api/v1/practice/{id}/help` (all run routes also use the `/api/v1` prefix).

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import CoachMessage from './CoachMessage';
 import 'katex/dist/katex.min.css';
 
-export default function LearningWorkspace({ request, initialSession, onSession }) {
+export default function LearningWorkspace({ request, initialSession, onSession, onPractice }) {
   const [lessons, setLessons] = useState([]);
   const [session, setSession] = useState(null);
   const [status, setStatus] = useState(null);
@@ -47,7 +47,7 @@ export default function LearningWorkspace({ request, initialSession, onSession }
       {!lessons.length && <button onClick={initialize}>Retry loading lessons</button>}
       <div className="lesson-tabs" aria-label="Lessons">{lessons.map((l,i) => <button key={l.id} disabled={busy} className={session?.lesson_id === l.id ? 'active' : ''} onClick={() => start(l)}><small>LESSON {i+1} · {l.minutes} MIN</small>{l.title}</button>)}</div>
       {!session ? <section className="card"><h2>Choose a lesson to begin</h2><p>Lessons are available without an API key. Your learning conversation is saved when you use the tutor.</p></section> : <div className="learning-grid">
-        <article className="card lesson"><span className="tag">{session.lesson.skill}</span><h2>{session.lesson.title}</h2>{session.lesson.sections.map(section => <section key={section.heading}><h3>{section.heading}</h3><p>{section.text}</p></section>)}<div className="takeaway"><strong>Remember</strong><p>{session.lesson.takeaway}</p></div></article>
+        <article className="card lesson"><span className="tag">{session.lesson.skill}</span><h2>{session.lesson.title}</h2>{session.lesson.sections.map(section => <section key={section.heading}><h3>{section.heading}</h3><p>{section.text}</p></section>)}<div className="takeaway"><strong>Remember</strong><p>{session.lesson.takeaway}</p><button className="primary" onClick={()=>onPractice(session.lesson.skill,'concept')}>Practice this concept →</button><button className="secondary" onClick={()=>onPractice(session.lesson.skill,'applied')}>Apply this concept →</button></div></article>
         <section className="card tutor"><span className="eyebrow">YOUR LEARNING COMPANION</span><h2>Talk it through.</h2><p>Ask for another example or explain the idea in your own words. This conversation isn’t a scored assessment.</p>
           {status?.configured ? <p className="connection">● Tutor configured · OpenAI</p> : <p className="setup-note">To enable the tutor, add your key to <code>backend/.env</code> and restart the backend. Keep reading in the meantime.</p>}
           <div className="messages" role="log" aria-live="polite">{session.messages.length === 0 && <p className="chat-empty">Try: “Explain the slope with a different example.”</p>}{session.messages.map(m => <div key={m.id} className={`message ${m.role}`}><strong className="message-author">{m.role === 'user' ? 'You' : 'Learning Coach'}</strong>{m.role === 'assistant' ? <CoachMessage content={m.content}/> : <p>{m.content}</p>}</div>)}</div>

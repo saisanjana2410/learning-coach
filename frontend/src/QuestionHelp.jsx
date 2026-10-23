@@ -1,0 +1,12 @@
+import React, {useEffect,useState} from 'react';
+import CoachMessage from './CoachMessage';
+
+export default function QuestionHelp({request,attemptId}){
+  const [open,setOpen]=useState(false),[messages,setMessages]=useState([]),[text,setText]=useState('');
+  const [pending,setPending]=useState(null),[busy,setBusy]=useState(false),[error,setError]=useState('');
+  function restore(value){setMessages(value.messages);const unanswered=value.messages.find(m=>m.role==='user'&&!value.messages.some(r=>r.reply_to===m.id));setPending(unanswered ? {client_message_id:unanswered.id,text:unanswered.content}:null);}
+  async function load(){setBusy(true);setError('');try{restore(await request(`/practice/${attemptId}/help`));}catch(e){setError(e.message);}finally{setBusy(false);}}
+  useEffect(()=>{if(open)load();},[open,attemptId]);
+  async function send(e){e.preventDefault();const message=pending||{client_message_id:crypto.randomUUID(),text:text.trim()};if(!message.text)return;setBusy(true);setPending(message);setError('');try{restore(await request(`/practice/${attemptId}/help`,{method:'POST',body:JSON.stringify(message)}));setText('');}catch(e){setError(e.message);}finally{setBusy(false);}}
+  return <section className="question-help"><button className="secondary" onClick={()=>setOpen(!open)} aria-expanded={open}>{open ? 'Close question help' : 'Help me understand this →'}</button>{open&&<><h3>Let’s work through this question.</h3><p>This discussion uses only this question, your submitted answer, its feedback, and your follow-ups. It won’t change your score.</p><div className="messages" role="log" aria-live="polite">{messages.map(m=><div className={`message ${m.role}`} key={m.id}><strong>{m.role==='user'?'You':'Learning Coach'}</strong><CoachMessage content={m.content}/></div>)}</div>{error&&<p className="error" role="alert">{error}</p>}<form onSubmit={send}><label htmlFor={`help-${attemptId}`}>What still feels unclear?</label><textarea id={`help-${attemptId}`} rows="4" maxLength="4000" value={pending?.text||text} disabled={busy||!!pending} onChange={e=>setText(e.target.value)} placeholder="Why does my explanation miss the point?"/><button className="primary" disabled={busy||(!pending&&!text.trim())}>{busy?'Explaining…':pending?'Retry help message →':'Ask about this question →'}</button></form><p className="fine">Question context and discussion are sent to OpenAI when you ask for help.</p></>}</section>;
+}

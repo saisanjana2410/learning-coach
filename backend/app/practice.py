@@ -28,6 +28,7 @@ class Attempt(Base):
 class Start(BaseModel):
     mode: Literal['concept','applied','interview'] = 'concept'
     skill: str | None = None
+    run_id: str | None = None
 
 class Submission(BaseModel):
     answer: str = Field(min_length=1,max_length=6000)
@@ -72,8 +73,9 @@ def summarize(db, now=None):
             'upcoming_reviews':sorted(progress,key=lambda p:p['due_at']),
             'recent_attempts':[serialize(r) for r in rows[-10:][::-1]]}
 
-def make_router(db_session, evaluator_fn=None):
-    router=APIRouter(prefix='/api/v1'); lock=Lock()
+def make_router(db_session, evaluator_fn=None, help_fn=None):
+    from .journeys import LearningRun, make_journey_router, practice_lock
+    router=APIRouter(prefix='/api/v1'); lock=practice_lock
 
     @router.get('/progress')
     def progress(db=Depends(db_session)):
@@ -90,15 +92,20 @@ def make_router(db_session, evaluator_fn=None):
         pending=db.scalar(select(Attempt).where(Attempt.status.in_(['awaiting_answer','failed'])).limit(1))
         if pending: raise HTTPException(409,'Finish or discard the current question first.')
         summary=summarize(db)
+        run=db.get(LearningRun,payload.run_id) if payload.run_id else None
+        if payload.run_id and (not run or run.status!='active'):
+            raise HTTPException(409,'Start or resume an active learning session.')
+        allowed=[q for q in QUESTIONS if not run or run.scope=='role' or q.get('topic_id','linear-regression')==run.topic_id]
+        allowed_skills=list(dict.fromkeys(q['skill'] for q in allowed))
         chosen_skill=payload.skill
         if chosen_skill is None:
-            priorities=summary['due_reviews'] or summary['weak_areas']
-            chosen_skill=priorities[0]['skill'] if priorities else next((s for s in SKILLS if not any(p['skill']==s and p['mode']==payload.mode for p in summary['skills'])),SKILLS[0])
-        candidates=[q for q in QUESTIONS if q['skill']==chosen_skill]
+            priorities=[p for p in (summary['due_reviews'] or summary['weak_areas']) if p['skill'] in allowed_skills]
+            chosen_skill=priorities[0]['skill'] if priorities else next((s for s in allowed_skills if not any(p['skill']==s and p['mode']==payload.mode for p in summary['skills'])),allowed_skills[0])
+        candidates=[q for q in allowed if q['skill']==chosen_skill]
         if not candidates: raise HTTPException(422,'Unknown skill.')
         history=list(db.scalars(select(Attempt).where(Attempt.status=='accepted')))
         question=min(candidates,key=lambda q:sum(json.loads(a.question_json)['id']==q['id'] for a in history))
-        question={**question,'version':1}
+        question={**question,'version':1,'run_id':payload.run_id}
         if payload.mode=='interview':
             question['prompt']='Interview question: '+question['prompt']+' Give a clear, concise explanation as you would to an interviewer.'
             question['criteria']=[*question['criteria'],'clarity']
@@ -140,4 +147,5 @@ def make_router(db_session, evaluator_fn=None):
             row.status='accepted'; db.commit()
             return serialize(row)
         finally: lock.release()
+    router.include_router(make_journey_router(db_session,start,help_fn))
     return router

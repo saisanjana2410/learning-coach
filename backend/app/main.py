@@ -75,10 +75,10 @@ class ChatInput(BaseModel):
             raise ValueError('Message cannot be blank')
         return value.strip()
 
-SKILLS = ['Interpret coefficients', 'Make predictions', 'Understand residuals', 'Measure prediction error', 'Evaluate on unseen data']
-TOPIC = {'id': 'linear-regression', 'title': 'Linear regression', 'description': 'Understand predictions, coefficients, and how to measure model error.', 'status': 'available', 'skills': SKILLS}
+SKILLS = ['Interpret coefficients', 'Make predictions', 'Understand residuals', 'Measure prediction error', 'Evaluate on unseen data', 'Python data handling', 'SQL aggregation', 'Classification metrics']
+TOPIC = {'id': 'linear-regression', 'title': 'Linear regression', 'description': 'Understand predictions, coefficients, and how to measure model error.', 'status': 'available', 'skills': SKILLS[:5]}
 
-def create_app(database_url=None, tutor_fn=None, evaluator_fn=None):
+def create_app(database_url=None, tutor_fn=None, evaluator_fn=None, help_fn=None):
     url = database_url or os.getenv('DATABASE_URL', f'sqlite:///{(BASE / "learning.db").as_posix()}')
     engine = create_engine(url, connect_args={'check_same_thread': False} if url.startswith('sqlite') else {})
 
@@ -100,7 +100,7 @@ def create_app(database_url=None, tutor_fn=None, evaluator_fn=None):
             yield session
 
     from .practice import make_router, summarize
-    api.include_router(make_router(db_session, evaluator_fn))
+    api.include_router(make_router(db_session, evaluator_fn, help_fn))
 
     @api.get('/api/v1/health')
     def health():
@@ -198,7 +198,7 @@ def create_app(database_url=None, tutor_fn=None, evaluator_fn=None):
         progress=summarize(db)
         return {'profile': Profile.model_validate(learner) if learner else None,
                 'topics': [TOPIC], 'due_reviews': progress['due_reviews'], 'weak_areas': progress['weak_areas'],
-                'assessed_skills': progress['assessed_skills'], 'active_session': {'id': active.id, 'lesson_id': active.lesson_id} if active else None,
+                'assessed_skills': progress['assessed_skills'], 'total_skills':len(SKILLS), 'active_session': {'id': active.id, 'lesson_id': active.lesson_id} if active else None,
                 'generated_at': datetime.now(timezone.utc).isoformat()}
 
     return api
