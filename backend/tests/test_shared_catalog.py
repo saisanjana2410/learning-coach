@@ -71,7 +71,7 @@ def test_catalog_seed_is_idempotent_and_preserves_accepted_evidence(tmp_path):
         assert updated['track']['title']=='Python Developer'
     with sqlite3.connect(path) as db:
         assert db.execute('select count(*) from catalog_roles').fetchone()[0]==5
-        assert db.execute('select count(*) from schema_migrations').fetchone()[0]==1
+        assert db.execute('select count(*) from schema_migrations').fetchone()[0]==2
         assert db.execute('select count(*) from catalog_projects').fetchone()[0]==20
         assert db.execute('select question_json,answer,feedback_json from practice_attempts where id=?',(aid,)).fetchone()==evidence
 
@@ -85,7 +85,11 @@ def test_role_run_freezes_topic_preferences(tmp_path):
         c.put(endpoint,json={'level':'advanced'})
         c.post(f'/api/v1/practice/{run["attempt"]["id"]}/submit',json={'answer':'Returns a value.'})
         following=c.post(f'/api/v1/runs/{run["run"]["id"]}/next',json={'skill':'Return values','mode':'interview'}).json()
-        assert following['attempt']['question']['level']=='beginner'
+        with sqlite3.connect(tmp_path/'run.db') as db:
+            config=json.loads(db.execute('select config_json from run_preferences where run_id=?',(run['run']['id'],)).fetchone()[0])
+        assert config['topic_levels']['python-functions']=='beginner'
+        question=following['attempt']['question']
+        assert question['level']==config['topic_levels'][question['submodule_id']]
 
 
 def test_planned_frontend_track_does_not_ask_unrelated_ml_questions(tmp_path):

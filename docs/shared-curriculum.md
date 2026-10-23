@@ -10,7 +10,7 @@ The catalog supports AI Engineer, React Frontend Developer, Python Developer, Ge
 4. Open an available lesson or start continuous conceptual/applied practice inside its submodule. Existing question-specific help, feedback, revision dates and summaries continue to work.
 5. Role interviews snapshot effective topic levels at session start. Preference changes apply to future sessions, leaving historical evidence and active difficulty intact.
 
-A starting level is self-reported preference, not demonstrated mastery. Foundational is a distinct level; it is not silently replaced by Beginner. There are currently no Foundational lesson packs. The existing starter packs remain available at their original three levels. Planned subjects and project specifications cannot be started.
+A starting level is self-reported preference, not demonstrated mastery. Foundational is a distinct level; it is not silently replaced by Beginner. Variables and data types now has a complete lesson pack at all four levels, including Foundational. The earlier starter packs remain available at their original three levels. Planned subjects and project specifications cannot be started.
 
 ## Data model and ownership
 
@@ -48,3 +48,13 @@ New preference endpoints:
 - Existing `PUT /api/v1/curriculum/{module_id}/level` supports all four levels.
 
 `GET /api/v1/curriculum` includes five roles, the selected track, source sections, planned projects and each topic's effective level, inheritance source and actual available lesson levels. Missing content stays visibly planned and cannot create an empty practice session.
+
+## Python variables and data types release
+
+The `python-basics` submodule provides four authored lessons: names and everyday types; input conversion and missing values; runtime type contracts; numeric representation and rounding. Each lesson includes its objective and prerequisites, explanation, worked example, runnable Python sample with expected output, guided exercise, independent challenge, mini-project task and visible assessment criteria, official reading links and suggested next topics.
+
+Concept practice selects concept checks and transfer questions. Applied practice selects a mini-project or independent challenge. There are two tasks per mode per level (16 tasks total). Submitted code is evaluated as text with criterion-based feedback and the existing evidence/revision logic; learner code is never executed by the service. Reading a lesson does not automatically award mastery.
+
+The content migration `python-basics-lessons-v2` adds versioned lesson/question snapshots and topic-skill links, then publishes availability for `python-basics`. It preserves prior content snapshots and learner evidence. The supplied role project ladders remain planned; these small lesson exercises are separate from those role projects.
+
+Reading sources: [Python tutorial](https://docs.python.org/3/tutorial/introduction.html), [built-in types](https://docs.python.org/3/library/stdtypes.html), and [Decimal](https://docs.python.org/3/library/decimal.html).

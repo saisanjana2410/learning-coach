@@ -86,7 +86,7 @@ def create_app(database_url=None, tutor_fn=None, evaluator_fn=None, help_fn=None
 
     @asynccontextmanager
     async def lifespan(app):
-        from .catalog_models import seed_catalog
+        from .catalog_models import seed_catalog, seed_python_basics
         # Keep a local recovery copy before the first additive catalog migration.
         if database_url is None and engine.url.drivername=='sqlite' and engine.url.database:
             import sqlite3
@@ -102,6 +102,7 @@ def create_app(database_url=None, tutor_fn=None, evaluator_fn=None, help_fn=None
         Base.metadata.create_all(engine)
         with Session(engine) as db:
             seed_catalog(db)
+            seed_python_basics(db)
         yield
         engine.dispose()
 

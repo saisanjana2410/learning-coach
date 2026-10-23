@@ -111,6 +111,10 @@ def make_router(db_session, evaluator_fn=None, help_fn=None):
         allowed=scoped_questions(run.topic_id if run.scope=='topic' else None,config['level'],config['module_levels'] if run.scope=='role' else None,config.get('topic_levels') if run.scope=='role' else None) if config else [q for q in QUESTIONS if not run or run.scope=='role' or q.get('topic_id','linear-regression')==run.topic_id]
         if config and run.scope=='role' and 'role_topic_ids' in config:
             allowed=[q for q in allowed if q['submodule_id'] in config['role_topic_ids']]
+        # Complete packs separate concept checks from submitted mini-projects.
+        if payload.mode in ('concept','applied'):
+            activity='concept_check' if payload.mode=='concept' else 'mini_project'
+            allowed=[q for q in allowed if not q.get('activity') or q['activity']==activity]
         if not allowed:raise HTTPException(422,'No reviewed questions are available at this level yet.')
         allowed_skills=list(dict.fromkeys(q['skill'] for q in allowed))
         chosen_skill=payload.skill

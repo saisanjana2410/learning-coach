@@ -106,7 +106,36 @@ def seed_catalog(db):
                          'concept_and_example':item['sections'],'runnable_code':None,
                          'guided_exercise':None,'independent_challenge':None,'mini_project':None,
                          'mastery_rubric':None,'further_reading':[],'status':'starter'})
+            if item.get('status')=='complete':definition=item
             db.add(ContentVersion(id=f'{kind}:{item["id"]}@{item.get("version",1)}',kind=kind,
                                   topic_id=item['submodule_id'],payload=json.dumps({**item,'definition':definition})))
     db.add(SchemaMigration(id=version,applied_at=datetime.now(timezone.utc).isoformat()))
+    db.commit()
+
+
+def seed_python_basics(db):
+    """Publish a new content release without changing existing content snapshots."""
+    from .python_basics import VERSION
+    from .curriculum import LESSONS, QUESTIONS, SUBMODULES, MODULES
+    from .track_catalog import slug
+    if db.get(SchemaMigration,VERSION):return
+    for kind,items in [('lesson',LESSONS),('assessment',QUESTIONS)]:
+        for item in items:
+            if item['submodule_id']!='python-basics':continue
+            identity=f'{kind}:{item["id"]}@{item.get("version",1)}'
+            if not db.get(ContentVersion,identity):
+                db.add(ContentVersion(id=identity,kind=kind,topic_id='python-basics',payload=json.dumps(item)))
+    for q in QUESTIONS:
+        if q['submodule_id']!='python-basics':continue
+        skill_id='python-basics:'+slug(q['skill'])
+        if not db.get(CatalogSkill,skill_id):
+            db.add(CatalogSkill(id=skill_id,title=q['skill']));db.flush()
+        if not db.get(TopicSkill,('python-basics',skill_id)):
+            db.add(TopicSkill(topic_id='python-basics',skill_id=skill_id));db.flush()
+    db.get(CatalogTopic,'python-basics').payload=json.dumps(SUBMODULES['python-basics'])
+    row=db.get(CatalogModule,'python')
+    payload=json.loads(row.payload)
+    payload.update(next(m for m in MODULES if m['id']=='python'))
+    row.payload=json.dumps(payload)
+    db.add(SchemaMigration(id=VERSION,applied_at=datetime.now(timezone.utc).isoformat()))
     db.commit()

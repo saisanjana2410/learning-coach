@@ -132,3 +132,5 @@ The development evaluation harness and baseline/refined reports are in `evals/`.
 # Shared role curriculum
 
 Modules now includes five role tracks, the full supplied roadmap and four starting levels, including Foundational. Set a subject level and optionally override individual topics. Existing learning history is preserved. New roadmap entries and project ladders are marked planned until their lessons and specifications are authored. See [the shared curriculum model and migration notes](docs/shared-curriculum.md).
+
+The first complete submodule is **Python → Variables and data types**, available at Beginner, Foundational, Intermediate and Advanced. It includes local runnable examples, exercises, mini-project rubrics, official reading links, and 16 concept/applied tasks. Submitted code receives feedback as text; the app does not execute it. Earlier lessons and progress remain available.
