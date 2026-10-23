@@ -107,6 +107,8 @@ def create_app(database_url=None, tutor_fn=None, evaluator_fn=None, help_fn=None
     api.include_router(make_router(db_session, evaluator_fn, help_fn))
     from .jobs import make_job_router
     api.include_router(make_job_router(db_session,job_extractor_fn))
+    from .feedback_flags import make_flag_router
+    api.include_router(make_flag_router(db_session))
 
     @api.get('/api/v1/health')
     def health():

@@ -1,0 +1,1635 @@
+{
+  "status": "complete",
+  "started_at": "2026-10-23T03:38:42.813898+00:00",
+  "model": "gpt-4.1-mini",
+  "prompt_version": "rubric-v3",
+  "dataset_version": "feedback-development-v1",
+  "dataset_sha256": "e1c6063707ead37850cc9857ee8ba17587a2710e8be4d47f3c89588e672d8bb3",
+  "label_provenance": "Project-authored reference judgments checked against the supplied rubrics. Independent human review is pending.",
+  "limitation": "Development regression set, not a held-out benchmark or a claim of grading accuracy.",
+  "case_count": 20,
+  "repetitions": 2,
+  "requested_calls": 40,
+  "questions": {
+    "residual-positive": {
+      "id": "residual-positive",
+      "skill": "Understand residuals",
+      "lesson_id": "residuals",
+      "prompt": "A model predicts 16 minutes, but delivery takes 19 minutes. Calculate the residual using actual minus predicted and explain whether the model overpredicted or underpredicted.",
+      "hint": "Use actual minus predicted. A prediction below the actual value is an underprediction.",
+      "criteria": [
+        "calculation",
+        "interpretation"
+      ],
+      "reference": "19 - 16 = +3 minutes; the model underpredicted by 3 minutes.",
+      "module_id": "ml",
+      "submodule_id": "linear-regression",
+      "level": "beginner",
+      "topic_id": "linear-regression",
+      "criterion_descriptions": {
+        "calculation": "Computes actual minus predicted correctly with the signed result and appropriate units.",
+        "interpretation": "Explicitly explains that the prediction is too low or that the model underpredicted. A numeric residual alone does not answer the interpretation request."
+      },
+      "version": 2
+    },
+    "python-functions-beginner-check": {
+      "id": "python-functions-beginner-check",
+      "version": 2,
+      "skill": "Return values",
+      "lesson_id": "python-functions-beginner",
+      "topic_id": "python-functions",
+      "module_id": "python",
+      "submodule_id": "python-functions",
+      "level": "beginner",
+      "prompt": "For def double(x): return x * 2, what is double(4)? Explain how return differs from print.",
+      "hint": "Define a function with def, give inputs names called parameters, and use return to hand a result back to the caller. A function that reaches its end without returning a value returns None.",
+      "criteria": [
+        "output",
+        "return_value"
+      ],
+      "reference": "double(4) returns 8. return supplies a value to the caller; print writes to output and its own return value is None.",
+      "criterion_descriptions": {
+        "output": "Correctly gives the returned numeric result for the specified function call. A concise correct value is sufficient; no derivation or terminology is required.",
+        "return_value": "Distinguishes returning a usable value to the caller from displaying output using print."
+      }
+    },
+    "python-functions-intermediate-check": {
+      "id": "python-functions-intermediate-check",
+      "version": 2,
+      "skill": "Safe function defaults",
+      "lesson_id": "python-functions-intermediate",
+      "topic_id": "python-functions",
+      "module_id": "python",
+      "submodule_id": "python-functions",
+      "level": "intermediate",
+      "prompt": "Why can def collect(x, items=[]): items.append(x); return items retain values between calls? Explain a safe replacement.",
+      "hint": "Python evaluates a default argument once when a function is defined. If the default is a mutable list, later calls reuse it. Use None when each call needs a fresh list.",
+      "criteria": [
+        "evaluation_time",
+        "replacement"
+      ],
+      "reference": "The list default is evaluated once at definition time and shared across calls. Use items=None and initialize a new list inside the function if items is None.",
+      "criterion_descriptions": {
+        "evaluation_time": "Explains that the mutable default is evaluated once at function definition and reused by later calls.",
+        "replacement": "Proposes a None default with a new list initialized inside the function when no list was provided."
+      }
+    },
+    "model-evaluation-intermediate-check": {
+      "id": "model-evaluation-intermediate-check",
+      "version": 2,
+      "skill": "Validation design",
+      "lesson_id": "model-evaluation-intermediate",
+      "topic_id": "model-evaluation",
+      "module_id": "ml",
+      "submodule_id": "model-evaluation",
+      "level": "intermediate",
+      "prompt": "You choose between many models using their test-set scores and report the best score. What is the problem, and how should the evaluation be organized?",
+      "hint": "Use training data to fit parameters, validation data to choose configurations, and an untouched test set to estimate the final procedure. Repeatedly selecting models based on test scores makes that test set part of development.",
+      "criteria": [
+        "selection_bias",
+        "split_roles"
+      ],
+      "reference": "Repeated selection on the test set biases its reported performance upward. Use validation or cross-validation for model selection and keep an independent final test set untouched until the procedure is chosen.",
+      "criterion_descriptions": {
+        "selection_bias": "Explains that selecting on test scores makes the winning estimate optimistic or no longer independent. The technical phrase selection bias is not required.",
+        "split_roles": "Uses validation or cross-validation for model selection and reserves independent final test data for evaluation."
+      }
+    }
+  },
+  "results": [
+    {
+      "case_id": "return-correct",
+      "question_id": "python-functions-beginner-check",
+      "category": "correct",
+      "repetition": 2,
+      "equivalence_group": "return-correct",
+      "expected": {
+        "output": "met",
+        "return_value": "met"
+      },
+      "expected_score": 100,
+      "valid": true,
+      "judgments": {
+        "output": "met",
+        "return_value": "met"
+      },
+      "score": 100,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "output",
+            "result": "met",
+            "evidence": "double(4) returns 8",
+            "explanation": "The answer explicitly states that double(4) returns 8, correctly giving the numeric output for the specified function call."
+          },
+          {
+            "id": "return_value",
+            "result": "met",
+            "evidence": "return passes a value to the caller, whereas print displays it",
+            "explanation": "The answer correctly distinguishes return from print by explaining that return passes a value to the caller while print displays it, showing understanding of the difference."
+          }
+        ],
+        "strengths": "The answer correctly provides the exact output for double(4) and clearly explains the difference between return and print in simple terms.",
+        "gap": "",
+        "next_step": "Practice writing and calling simple functions that both return values and use print to reinforce the distinction between returning a value and outputting it."
+      },
+      "latency_seconds": 2.172
+    },
+    {
+      "case_id": "return-correct",
+      "question_id": "python-functions-beginner-check",
+      "category": "correct",
+      "repetition": 1,
+      "equivalence_group": "return-correct",
+      "expected": {
+        "output": "met",
+        "return_value": "met"
+      },
+      "expected_score": 100,
+      "valid": true,
+      "judgments": {
+        "output": "met",
+        "return_value": "met"
+      },
+      "score": 100,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "output",
+            "result": "met",
+            "evidence": "double(4) returns 8",
+            "explanation": "The answer clearly states the correct output of double(4) is 8."
+          },
+          {
+            "id": "return_value",
+            "result": "met",
+            "evidence": "return passes a value to the caller, whereas print displays it. Printing is not a substitute for returning a value",
+            "explanation": "The answer correctly distinguishes that return supplies a value to the caller, while print simply displays it and does not substitute return."
+          }
+        ],
+        "strengths": "The answer correctly provides the precise output value and clearly explains the difference between return and print in a concise and accurate way.",
+        "gap": "No evident gaps as both criteria were met successfully.",
+        "next_step": "Practice writing simple functions that both return values and use print to reinforce the distinction between returning data versus displaying output."
+      },
+      "latency_seconds": 2.212
+    },
+    {
+      "case_id": "return-paraphrase",
+      "question_id": "python-functions-beginner-check",
+      "category": "equivalent",
+      "repetition": 1,
+      "equivalence_group": "return-correct",
+      "expected": {
+        "output": "met",
+        "return_value": "met"
+      },
+      "expected_score": 100,
+      "valid": true,
+      "judgments": {
+        "output": "met",
+        "return_value": "met"
+      },
+      "score": 100,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "output",
+            "result": "met",
+            "evidence": "The call evaluates to eight.",
+            "explanation": "The answer correctly states that the call evaluates to eight, which is the correct numeric result of double(4)."
+          },
+          {
+            "id": "return_value",
+            "result": "met",
+            "evidence": "A returned result can be used in a later expression; print only writes output and itself yields None.",
+            "explanation": "The answer clearly distinguishes return as supplying a value that can be used later from print which writes output and returns None."
+          }
+        ],
+        "strengths": "The answer succinctly provides the correct numeric output for double(4) and clearly explains the difference between return and print in terms of usability and output.",
+        "gap": "No significant gaps; both criteria are fully met with concise clear explanations.",
+        "next_step": "Practice writing additional functions that use return and print to strengthen understanding of their roles and effects."
+      },
+      "latency_seconds": 1.44
+    },
+    {
+      "case_id": "return-paraphrase",
+      "question_id": "python-functions-beginner-check",
+      "category": "equivalent",
+      "repetition": 2,
+      "equivalence_group": "return-correct",
+      "expected": {
+        "output": "met",
+        "return_value": "met"
+      },
+      "expected_score": 100,
+      "valid": true,
+      "judgments": {
+        "output": "met",
+        "return_value": "met"
+      },
+      "score": 100,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "output",
+            "result": "met",
+            "evidence": "The call evaluates to eight.",
+            "explanation": "The answer clearly states that the call evaluates to eight, which is the numeric result of double(4)."
+          },
+          {
+            "id": "return_value",
+            "result": "met",
+            "evidence": "A returned result can be used in a later expression; print only writes output and itself yields None.",
+            "explanation": "The answer correctly distinguishes that return supplies a usable value to the caller and that print only writes output and returns None."
+          }
+        ],
+        "strengths": "The answer provides a concise correct numeric output for the function call and correctly explains the difference between return and print in a technical way.",
+        "gap": "There are no gaps; both criteria are fully met with accurate and clear explanations.",
+        "next_step": "Practice writing simple functions using return and print to deepen understanding of their behavioral differences."
+      },
+      "latency_seconds": 1.687
+    },
+    {
+      "case_id": "return-incomplete",
+      "question_id": "python-functions-beginner-check",
+      "category": "partial",
+      "repetition": 1,
+      "equivalence_group": null,
+      "expected": {
+        "output": "met",
+        "return_value": "not_met"
+      },
+      "expected_score": 50,
+      "valid": true,
+      "judgments": {
+        "output": "met",
+        "return_value": "not_met"
+      },
+      "score": 50,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "output",
+            "result": "met",
+            "evidence": "It returns 8.",
+            "explanation": "The response correctly states the output of double(4) as 8, fulfilling the output criterion."
+          },
+          {
+            "id": "return_value",
+            "result": "not_met",
+            "evidence": "",
+            "explanation": "The response does not explain how return differs from print."
+          }
+        ],
+        "strengths": "The answer correctly identifies that double(4) returns 8, showing understanding of the function's output.",
+        "gap": "The answer does not explain the difference between return and print as requested.",
+        "next_step": "Practice explaining the conceptual difference between return and print in Python functions, clarifying that return passes data back to the caller while print outputs to the console without affecting the function's return value."
+      },
+      "latency_seconds": 1.545
+    },
+    {
+      "case_id": "return-incomplete",
+      "question_id": "python-functions-beginner-check",
+      "category": "partial",
+      "repetition": 2,
+      "equivalence_group": null,
+      "expected": {
+        "output": "met",
+        "return_value": "not_met"
+      },
+      "expected_score": 50,
+      "valid": true,
+      "judgments": {
+        "output": "met",
+        "return_value": "not_met"
+      },
+      "score": 50,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "output",
+            "result": "met",
+            "evidence": "It returns 8.",
+            "explanation": "The answer directly states the correct returned numeric result for double(4) as 8."
+          },
+          {
+            "id": "return_value",
+            "result": "not_met",
+            "evidence": "",
+            "explanation": "The answer does not explain how return differs from print as requested; it only gives the result value."
+          }
+        ],
+        "strengths": "Clearly states the correct return value from double(4) as 8.",
+        "gap": "Does not explain the difference between return and print.",
+        "next_step": "Practice explaining how return passes a value back to the caller whereas print outputs to the console and returns None."
+      },
+      "latency_seconds": 1.442
+    },
+    {
+      "case_id": "return-wrong",
+      "question_id": "python-functions-beginner-check",
+      "category": "incorrect",
+      "repetition": 1,
+      "equivalence_group": null,
+      "expected": {
+        "output": "not_met",
+        "return_value": "not_met"
+      },
+      "expected_score": 0,
+      "valid": true,
+      "judgments": {
+        "output": "not_met",
+        "return_value": "not_met"
+      },
+      "score": 0,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "output",
+            "result": "not_met",
+            "evidence": "double(4) returns 4",
+            "explanation": "The answer incorrectly states the output of double(4) as 4 instead of the correct value 8."
+          },
+          {
+            "id": "return_value",
+            "result": "not_met",
+            "evidence": "return only displays text, while print sends the numeric value back to the caller",
+            "explanation": "The explanation reverses the roles of return and print, incorrectly stating that return displays text and print sends the value back to the caller, which is inaccurate."
+          }
+        ],
+        "strengths": "",
+        "gap": "The answer contains incorrect information about both the function's output and the difference between return and print.",
+        "next_step": "Review how the return statement works in Python functions compared to print, and verify function outputs by testing code snippets such as double(4) with def double(x): return x * 2."
+      },
+      "latency_seconds": 1.409
+    },
+    {
+      "case_id": "return-wrong",
+      "question_id": "python-functions-beginner-check",
+      "category": "incorrect",
+      "repetition": 2,
+      "equivalence_group": null,
+      "expected": {
+        "output": "not_met",
+        "return_value": "not_met"
+      },
+      "expected_score": 0,
+      "valid": true,
+      "judgments": {
+        "output": "not_met",
+        "return_value": "not_met"
+      },
+      "score": 0,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "output",
+            "result": "not_met",
+            "evidence": "double(4) returns 4",
+            "explanation": "The answer states double(4) returns 4, but the function doubles the input, so the correct output is 8."
+          },
+          {
+            "id": "return_value",
+            "result": "not_met",
+            "evidence": "return only displays text, while print sends the numeric value back to the caller",
+            "explanation": "The explanation reverses the correct roles: return supplies a value to the caller, while print displays output and returns None. The answer confuses their functions."
+          }
+        ],
+        "strengths": "",
+        "gap": "The answer incorrectly states the output of double(4) and misunderstands the difference between return and print.",
+        "next_step": "Review how functions return values to the caller versus how print outputs to the screen, and verify the function's logic for doubling a number."
+      },
+      "latency_seconds": 1.321
+    },
+    {
+      "case_id": "return-uncertain",
+      "question_id": "python-functions-beginner-check",
+      "category": "ambiguous",
+      "repetition": 2,
+      "equivalence_group": null,
+      "expected": {
+        "output": "insufficient_evidence",
+        "return_value": "insufficient_evidence"
+      },
+      "expected_score": null,
+      "valid": true,
+      "judgments": {
+        "output": "insufficient_evidence",
+        "return_value": "insufficient_evidence"
+      },
+      "score": null,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "output",
+            "result": "insufficient_evidence",
+            "evidence": "",
+            "explanation": "The answer 'I am not sure how to answer this.' does not provide any interpretable numeric output value for double(4)."
+          },
+          {
+            "id": "return_value",
+            "result": "insufficient_evidence",
+            "evidence": "",
+            "explanation": "The answer does not provide any explanation distinguishing return from print."
+          }
+        ],
+        "strengths": "",
+        "gap": "The learner did not provide any substantive answer to the question about the output of double(4) or the difference between return and print.",
+        "next_step": "Encourage the learner to attempt giving the output of double(4), which is 8, and explain that return passes a value back to the caller function while print outputs text to the screen and returns None."
+      },
+      "latency_seconds": 1.389
+    },
+    {
+      "case_id": "return-uncertain",
+      "question_id": "python-functions-beginner-check",
+      "category": "ambiguous",
+      "repetition": 1,
+      "equivalence_group": null,
+      "expected": {
+        "output": "insufficient_evidence",
+        "return_value": "insufficient_evidence"
+      },
+      "expected_score": null,
+      "valid": true,
+      "judgments": {
+        "output": "insufficient_evidence",
+        "return_value": "insufficient_evidence"
+      },
+      "score": null,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "output",
+            "result": "insufficient_evidence",
+            "evidence": "",
+            "explanation": "The answer 'I am not sure how to answer this.' does not provide any substantive claim about the output of double(4)."
+          },
+          {
+            "id": "return_value",
+            "result": "insufficient_evidence",
+            "evidence": "",
+            "explanation": "The answer does not explain how return differs from print or distinguish their behaviors."
+          }
+        ],
+        "strengths": "",
+        "gap": "The learner did not attempt to provide a numeric output result nor distinguish the role of return from print.",
+        "next_step": "Encourage the learner to try to predict the output of double(4) and explain the difference between returning a value and printing it, possibly with simple examples."
+      },
+      "latency_seconds": 1.799
+    },
+    {
+      "case_id": "defaults-correct",
+      "question_id": "python-functions-intermediate-check",
+      "category": "correct",
+      "repetition": 1,
+      "equivalence_group": "defaults-correct",
+      "expected": {
+        "evaluation_time": "met",
+        "replacement": "met"
+      },
+      "expected_score": 100,
+      "valid": true,
+      "judgments": {
+        "evaluation_time": "met",
+        "replacement": "met"
+      },
+      "score": 100,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "evaluation_time",
+            "result": "met",
+            "evidence": "The default list is created once when the function is defined and is shared between calls",
+            "explanation": "The answer explicitly explains that the default list is created once at function definition and shared by later calls, causing mutations to persist."
+          },
+          {
+            "id": "replacement",
+            "result": "met",
+            "evidence": "Use items=None and create a fresh list inside the function when items is None",
+            "explanation": "The answer clearly states the safe replacement pattern of using None as default and creating a new list inside the function if the argument is None."
+          }
+        ],
+        "strengths": "The response correctly identifies the core reason the default list retains values — that it is created once at definition time and shared across calls. It also accurately provides the standard safe replacement using None and initializing a new list inside the function.",
+        "gap": "No gap present; the answer fully addresses both the reason and safe replacement as asked.",
+        "next_step": "Continue practicing with other common Python mutable default argument pitfalls and write example functions that demonstrate correct and incorrect usage to reinforce understanding."
+      },
+      "latency_seconds": 1.647
+    },
+    {
+      "case_id": "defaults-correct",
+      "question_id": "python-functions-intermediate-check",
+      "category": "correct",
+      "repetition": 2,
+      "equivalence_group": "defaults-correct",
+      "expected": {
+        "evaluation_time": "met",
+        "replacement": "met"
+      },
+      "expected_score": 100,
+      "valid": true,
+      "judgments": {
+        "evaluation_time": "met",
+        "replacement": "met"
+      },
+      "score": 100,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "evaluation_time",
+            "result": "met",
+            "evidence": "The default list is created once when the function is defined and is shared between calls",
+            "explanation": "The answer correctly explains that the default list is evaluated once at definition and shared, causing mutations to persist between calls."
+          },
+          {
+            "id": "replacement",
+            "result": "met",
+            "evidence": "Use items=None and create a fresh list inside the function when items is None",
+            "explanation": "The answer proposes using None as the default and initializing a new list inside the function, which is the safe replacement."
+          }
+        ],
+        "strengths": "The answer clearly and succinctly explains both why the default list retains values and how to safely replace it using None and an internal initialization.",
+        "gap": "The explanation could be expanded with a small code example to illustrate the concept more concretely.",
+        "next_step": "Practice writing and testing functions with mutable default arguments and their safe None-based replacements to internalize the behavior and proper pattern."
+      },
+      "latency_seconds": 1.524
+    },
+    {
+      "case_id": "defaults-paraphrase",
+      "question_id": "python-functions-intermediate-check",
+      "category": "equivalent",
+      "repetition": 1,
+      "equivalence_group": "defaults-correct",
+      "expected": {
+        "evaluation_time": "met",
+        "replacement": "met"
+      },
+      "expected_score": 100,
+      "valid": true,
+      "judgments": {
+        "evaluation_time": "met",
+        "replacement": "met"
+      },
+      "score": 100,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "evaluation_time",
+            "result": "met",
+            "evidence": "Defining collect evaluates [] just once, leaving later invocations with the same mutable object.",
+            "explanation": "The answer explicitly states that the default list [] is evaluated once at function definition and the same mutable object is reused in later calls, capturing the essence of the evaluation timing."
+          },
+          {
+            "id": "replacement",
+            "result": "met",
+            "evidence": "Replace that default with None and initialize items=[] in the body only if items is None.",
+            "explanation": "The answer correctly proposes replacing the mutable default with None and then initializing a new list inside the function if items is None, exactly the safe replacement requested."
+          }
+        ],
+        "strengths": "The answer succinctly and accurately explains both the reason why mutable default arguments retain values between calls and the safe replacement pattern using None and internal initialization.",
+        "gap": "There is no significant gap; the answer covers both criteria clearly and correctly.",
+        "next_step": "Practice writing function definitions with mutable default arguments and the None-replacement pattern to reinforce understanding of safe defaults."
+      },
+      "latency_seconds": 1.514
+    },
+    {
+      "case_id": "defaults-paraphrase",
+      "question_id": "python-functions-intermediate-check",
+      "category": "equivalent",
+      "repetition": 2,
+      "equivalence_group": "defaults-correct",
+      "expected": {
+        "evaluation_time": "met",
+        "replacement": "met"
+      },
+      "expected_score": 100,
+      "valid": true,
+      "judgments": {
+        "evaluation_time": "met",
+        "replacement": "met"
+      },
+      "score": 100,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "evaluation_time",
+            "result": "met",
+            "evidence": "Defining collect evaluates [] just once, leaving later invocations with the same mutable object.",
+            "explanation": "The answer clearly explains that the default mutable list [] is evaluated once at function definition, causing later calls to share the same list object."
+          },
+          {
+            "id": "replacement",
+            "result": "met",
+            "evidence": "Replace that default with None and initialize items=[] in the body only if items is None.",
+            "explanation": "The answer proposes a safe replacement by setting the default to None and creating a new list inside the function if items is None, which avoids reusing the same list across calls."
+          }
+        ],
+        "strengths": "The answer succinctly and accurately explains both why the mutable default list is shared across calls and how to safely replace it with a None default and internal initialization.",
+        "gap": "The explanation could be expanded with a code example for clarity, but the core reasoning is complete.",
+        "next_step": "Practice by writing and testing the corrected function with the None default and internal list initialization to reinforce understanding."
+      },
+      "latency_seconds": 1.561
+    },
+    {
+      "case_id": "defaults-incomplete",
+      "question_id": "python-functions-intermediate-check",
+      "category": "partial",
+      "repetition": 1,
+      "equivalence_group": null,
+      "expected": {
+        "evaluation_time": "met",
+        "replacement": "not_met"
+      },
+      "expected_score": 50,
+      "valid": true,
+      "judgments": {
+        "evaluation_time": "met",
+        "replacement": "not_met"
+      },
+      "score": 50,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "evaluation_time",
+            "result": "met",
+            "evidence": "The list default is evaluated once at function definition time and reused across calls.",
+            "explanation": "The answer explicitly states that the list default is evaluated once at function definition and then reused, matching the criterion."
+          },
+          {
+            "id": "replacement",
+            "result": "not_met",
+            "evidence": "",
+            "explanation": "The answer does not propose using None as a default or explain initializing a new list inside the function."
+          }
+        ],
+        "strengths": "The answer clearly and correctly explains that the mutable default argument is evaluated once at definition time and reused across calls.",
+        "gap": "The answer does not include a safe replacement pattern using a None default and initializing a new list inside the function.",
+        "next_step": "Learn and explain how to use None as a default argument and initialize a new list inside the function to avoid sharing mutable default arguments across calls."
+      },
+      "latency_seconds": 1.512
+    },
+    {
+      "case_id": "defaults-incomplete",
+      "question_id": "python-functions-intermediate-check",
+      "category": "partial",
+      "repetition": 2,
+      "equivalence_group": null,
+      "expected": {
+        "evaluation_time": "met",
+        "replacement": "not_met"
+      },
+      "expected_score": 50,
+      "valid": true,
+      "judgments": {
+        "evaluation_time": "met",
+        "replacement": "not_met"
+      },
+      "score": 50,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "evaluation_time",
+            "result": "met",
+            "evidence": "The list default is evaluated once at function definition time and reused across calls.",
+            "explanation": "The answer explicitly states that the list default is evaluated once when the function is defined and reused in subsequent calls, correctly explaining the root cause of the behavior."
+          },
+          {
+            "id": "replacement",
+            "result": "not_met",
+            "evidence": "",
+            "explanation": "The answer does not provide any explanation or proposal for a safe replacement such as using None and initializing a new list inside the function."
+          }
+        ],
+        "strengths": "Clearly explains why the mutable default list persists between function calls, indicating a good understanding of evaluation time for default arguments.",
+        "gap": "Does not offer or explain the safe replacement method involving None and initialization inside the function.",
+        "next_step": "Learn and practice the safe default pattern by setting the default parameter to None and creating a new list within the function when needed, to prevent unintended sharing of mutable defaults."
+      },
+      "latency_seconds": 1.533
+    },
+    {
+      "case_id": "defaults-wrong",
+      "question_id": "python-functions-intermediate-check",
+      "category": "incorrect",
+      "repetition": 1,
+      "equivalence_group": null,
+      "expected": {
+        "evaluation_time": "not_met",
+        "replacement": "not_met"
+      },
+      "expected_score": 0,
+      "valid": true,
+      "judgments": {
+        "evaluation_time": "not_met",
+        "replacement": "not_met"
+      },
+      "score": 0,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "evaluation_time",
+            "result": "not_met",
+            "evidence": "Python creates a fresh default list every time the function is called",
+            "explanation": "The answer incorrectly states that a fresh default list is created every call, while the correct explanation is that the default list is created once at function definition and reused afterwards."
+          },
+          {
+            "id": "replacement",
+            "result": "not_met",
+            "evidence": "Keeping items=[] is the safe replacement and cannot share data between calls",
+            "explanation": "The provided replacement is incorrect; the safe replacement is to use items=None and initialize a new list inside the function, not to keep items=[] as the default."
+          }
+        ],
+        "strengths": "",
+        "gap": "The answer misunderstands the core concept of default mutable argument evaluation time and gives the wrong safe replacement suggestion.",
+        "next_step": "Review how Python function default argument evaluation works, focusing on mutable defaults, and understand why using None as the default with an internal initialization is the safe pattern."
+      },
+      "latency_seconds": 1.455
+    },
+    {
+      "case_id": "defaults-wrong",
+      "question_id": "python-functions-intermediate-check",
+      "category": "incorrect",
+      "repetition": 2,
+      "equivalence_group": null,
+      "expected": {
+        "evaluation_time": "not_met",
+        "replacement": "not_met"
+      },
+      "expected_score": 0,
+      "valid": true,
+      "judgments": {
+        "evaluation_time": "not_met",
+        "replacement": "not_met"
+      },
+      "score": 0,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "evaluation_time",
+            "result": "not_met",
+            "evidence": "Python creates a fresh default list every time the function is called.",
+            "explanation": "The answer incorrectly claims that a fresh list is created every call, which is false; the default list is evaluated once at definition and reused."
+          },
+          {
+            "id": "replacement",
+            "result": "not_met",
+            "evidence": "Keeping items=[] is the safe replacement and cannot share data between calls.",
+            "explanation": "The answer suggests keeping items=[] as safe, which is incorrect; the safe replacement is items=None with list initialization inside."
+          }
+        ],
+        "strengths": "",
+        "gap": "The answer demonstrates a misunderstanding of how default mutable arguments work, incorrectly stating that a fresh list is created every call and giving the wrong safe replacement.",
+        "next_step": "Review how Python evaluates default argument values at function definition time, especially with mutable types, and learn the correct idiom using None as the default followed by initialization inside the function."
+      },
+      "latency_seconds": 1.534
+    },
+    {
+      "case_id": "defaults-uncertain",
+      "question_id": "python-functions-intermediate-check",
+      "category": "ambiguous",
+      "repetition": 1,
+      "equivalence_group": null,
+      "expected": {
+        "evaluation_time": "insufficient_evidence",
+        "replacement": "insufficient_evidence"
+      },
+      "expected_score": null,
+      "valid": true,
+      "judgments": {
+        "evaluation_time": "insufficient_evidence",
+        "replacement": "insufficient_evidence"
+      },
+      "score": null,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "evaluation_time",
+            "result": "insufficient_evidence",
+            "evidence": "",
+            "explanation": "The answer does not discuss when the default list is evaluated or mention reuse across calls."
+          },
+          {
+            "id": "replacement",
+            "result": "insufficient_evidence",
+            "evidence": "",
+            "explanation": "The answer does not propose a safe replacement or describe using None and initializing a new list inside the function."
+          }
+        ],
+        "strengths": "",
+        "gap": "The answer does not explain why default list parameters retain values between calls, nor does it suggest the recommended safe pattern using None.",
+        "next_step": "Study how Python evaluates default arguments, particularly mutable defaults, and learn the recommended pattern for safely using mutable defaults by using None and initializing inside the function."
+      },
+      "latency_seconds": 1.255
+    },
+    {
+      "case_id": "defaults-uncertain",
+      "question_id": "python-functions-intermediate-check",
+      "category": "ambiguous",
+      "repetition": 2,
+      "equivalence_group": null,
+      "expected": {
+        "evaluation_time": "insufficient_evidence",
+        "replacement": "insufficient_evidence"
+      },
+      "expected_score": null,
+      "valid": true,
+      "judgments": {
+        "evaluation_time": "insufficient_evidence",
+        "replacement": "insufficient_evidence"
+      },
+      "score": null,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "evaluation_time",
+            "result": "insufficient_evidence",
+            "evidence": "",
+            "explanation": "The response does not explain why the default mutable list retains values between calls or any concept related to default argument evaluation time."
+          },
+          {
+            "id": "replacement",
+            "result": "insufficient_evidence",
+            "evidence": "",
+            "explanation": "The response does not propose or explain a safe replacement for the mutable default argument problem."
+          }
+        ],
+        "strengths": "",
+        "gap": "The answer fails to address either why the mutable default list retains values between calls or how to safely replace it.",
+        "next_step": "Learn about Python function default argument evaluation time and understand how to use None as a safe default to avoid shared mutable defaults."
+      },
+      "latency_seconds": 1.188
+    },
+    {
+      "case_id": "residual-correct",
+      "question_id": "residual-positive",
+      "category": "correct",
+      "repetition": 1,
+      "equivalence_group": "residual-correct",
+      "expected": {
+        "calculation": "met",
+        "interpretation": "met"
+      },
+      "expected_score": 100,
+      "valid": true,
+      "judgments": {
+        "calculation": "met",
+        "interpretation": "met"
+      },
+      "score": 100,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "calculation",
+            "result": "met",
+            "evidence": "The residual is 19 - 16 = +3 minutes.",
+            "explanation": "The answer correctly computes the residual as actual minus predicted, giving the signed result +3 minutes with units."
+          },
+          {
+            "id": "interpretation",
+            "result": "met",
+            "evidence": "so the model underpredicted by 3 minutes.",
+            "explanation": "The answer explicitly states that the model underpredicted, explaining the prediction was too low relative to actual."
+          }
+        ],
+        "strengths": "The answer correctly calculates the residual with appropriate units and clearly explains that the model underpredicted the actual delivery time.",
+        "gap": "None; all criteria were met with clear and correct reasoning.",
+        "next_step": "Continue practicing residual calculations with varied examples to solidify understanding of both computing and interpreting residuals."
+      },
+      "latency_seconds": 1.335
+    },
+    {
+      "case_id": "residual-correct",
+      "question_id": "residual-positive",
+      "category": "correct",
+      "repetition": 2,
+      "equivalence_group": "residual-correct",
+      "expected": {
+        "calculation": "met",
+        "interpretation": "met"
+      },
+      "expected_score": 100,
+      "valid": true,
+      "judgments": {
+        "calculation": "met",
+        "interpretation": "met"
+      },
+      "score": 100,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "calculation",
+            "result": "met",
+            "evidence": "The residual is 19 - 16 = +3 minutes.",
+            "explanation": "The answer correctly computes the residual as actual minus predicted, showing the calculation '19 - 16 = +3 minutes' with units."
+          },
+          {
+            "id": "interpretation",
+            "result": "met",
+            "evidence": "The actual delivery took longer, so the model underpredicted by 3 minutes.",
+            "explanation": "The answer explicitly explains that the model underpredicted because the actual delivery time was longer than predicted, meeting the interpretation criterion."
+          }
+        ],
+        "strengths": "The learner correctly calculated the residual with the proper signed value and units, and provided a clear explanation that the model underpredicted because the actual time was greater than the predicted time.",
+        "gap": "",
+        "next_step": "Continue practicing residual calculations and interpretations with more examples involving different prediction errors and varying contexts to strengthen understanding."
+      },
+      "latency_seconds": 1.53
+    },
+    {
+      "case_id": "residual-paraphrase",
+      "question_id": "residual-positive",
+      "category": "equivalent",
+      "repetition": 1,
+      "equivalence_group": "residual-correct",
+      "expected": {
+        "calculation": "met",
+        "interpretation": "met"
+      },
+      "expected_score": 100,
+      "valid": true,
+      "judgments": {
+        "calculation": "met",
+        "interpretation": "met"
+      },
+      "score": 100,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "calculation",
+            "result": "met",
+            "evidence": "Actual minus predicted is positive three minutes",
+            "explanation": "The answer correctly computes the residual as actual minus predicted, giving the signed result of +3 minutes."
+          },
+          {
+            "id": "interpretation",
+            "result": "met",
+            "evidence": "meaning the forecast was too low",
+            "explanation": "The answer explicitly explains that the model prediction was too low, which means it underpredicted."
+          }
+        ],
+        "strengths": "The answer provides a correct computation of the residual with proper sign and units, and clearly interprets that the forecast was an underprediction.",
+        "gap": "No evident gaps; both calculation and interpretation are correctly addressed.",
+        "next_step": "To deepen understanding, practice calculating and interpreting residuals with varying prediction and actual values, including negative residuals and zero residuals."
+      },
+      "latency_seconds": 1.413
+    },
+    {
+      "case_id": "residual-paraphrase",
+      "question_id": "residual-positive",
+      "category": "equivalent",
+      "repetition": 2,
+      "equivalence_group": "residual-correct",
+      "expected": {
+        "calculation": "met",
+        "interpretation": "met"
+      },
+      "expected_score": 100,
+      "valid": true,
+      "judgments": {
+        "calculation": "met",
+        "interpretation": "met"
+      },
+      "score": 100,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "calculation",
+            "result": "met",
+            "evidence": "Actual minus predicted is positive three minutes",
+            "explanation": "The answer correctly computes the residual by indicating it is +3 minutes (actual of 19 minus predicted of 16)."
+          },
+          {
+            "id": "interpretation",
+            "result": "met",
+            "evidence": "meaning the forecast was too low",
+            "explanation": "The explanation clearly states that the forecast was too low, which clarifies the model underpredicted the actual time."
+          }
+        ],
+        "strengths": "The answer accurately calculates the residual using actual minus predicted and correctly interprets that a positive residual means the model underpredicted the delivery time.",
+        "gap": "The answer does not explicitly state the numeric calculation '19 - 16 = 3' or include the units in a simple arithmetic form, which could make it clearer.",
+        "next_step": "Practice explicitly showing the numeric calculation step with units before interpreting the result to reinforce clarity in residual computations and interpretations."
+      },
+      "latency_seconds": 1.573
+    },
+    {
+      "case_id": "residual-incomplete",
+      "question_id": "residual-positive",
+      "category": "partial",
+      "repetition": 1,
+      "equivalence_group": null,
+      "expected": {
+        "calculation": "met",
+        "interpretation": "not_met"
+      },
+      "expected_score": 50,
+      "valid": true,
+      "judgments": {
+        "calculation": "met",
+        "interpretation": "not_met"
+      },
+      "score": 50,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "calculation",
+            "result": "met",
+            "evidence": "19 - 16 = +3 minutes.",
+            "explanation": "The answer correctly computes actual minus predicted with the signed result and includes appropriate units 'minutes'."
+          },
+          {
+            "id": "interpretation",
+            "result": "not_met",
+            "evidence": "",
+            "explanation": "The answer does not explicitly explain that the prediction is too low or that the model underpredicted. It provides only the numeric residual without interpretation."
+          }
+        ],
+        "strengths": "The learner accurately computed the residual as actual minus predicted and included the correct units.",
+        "gap": "The learner did not explain whether the model overpredicted or underpredicted, which is necessary to fully address the question.",
+        "next_step": "Practice explaining the meaning of residuals, specifically whether the model overpredicts or underpredicts based on the sign and value of the residual."
+      },
+      "latency_seconds": 1.427
+    },
+    {
+      "case_id": "residual-incomplete",
+      "question_id": "residual-positive",
+      "category": "partial",
+      "repetition": 2,
+      "equivalence_group": null,
+      "expected": {
+        "calculation": "met",
+        "interpretation": "not_met"
+      },
+      "expected_score": 50,
+      "valid": true,
+      "judgments": {
+        "calculation": "met",
+        "interpretation": "not_met"
+      },
+      "score": 50,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "calculation",
+            "result": "met",
+            "evidence": "19 - 16 = +3 minutes.",
+            "explanation": "The calculation is performed correctly using actual minus predicted, giving +3 minutes as the residual with appropriate units."
+          },
+          {
+            "id": "interpretation",
+            "result": "not_met",
+            "evidence": "",
+            "explanation": "The explanation does not explicitly state whether the model overpredicted or underpredicted, nor does it interpret the sign of the residual."
+          }
+        ],
+        "strengths": "Correctly calculates the residual as +3 minutes using actual minus predicted with units.",
+        "gap": "Does not interpret the residual to indicate whether the model overpredicted or underpredicted.",
+        "next_step": "Add a sentence explaining that since the actual value is higher than the prediction, the model underpredicted by 3 minutes."
+      },
+      "latency_seconds": 1.368
+    },
+    {
+      "case_id": "residual-wrong",
+      "question_id": "residual-positive",
+      "category": "incorrect",
+      "repetition": 1,
+      "equivalence_group": null,
+      "expected": {
+        "calculation": "not_met",
+        "interpretation": "not_met"
+      },
+      "expected_score": 0,
+      "valid": true,
+      "judgments": {
+        "calculation": "not_met",
+        "interpretation": "not_met"
+      },
+      "score": 0,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "calculation",
+            "result": "not_met",
+            "evidence": "The residual is 16 - 19 = -3 minutes",
+            "explanation": "The calculation was done as predicted minus actual (16 - 19) rather than actual minus predicted as requested, so the sign and interpretation are reversed."
+          },
+          {
+            "id": "interpretation",
+            "result": "not_met",
+            "evidence": "the model overpredicted by 3 minutes",
+            "explanation": "Because the calculation was incorrect (sign reversed), the interpretation that the model overpredicted is also incorrect. Using actual minus predicted, a positive residual means underprediction, so the model underpredicted, not overpredicted."
+          }
+        ],
+        "strengths": "The answer correctly performs a subtraction operation involving the predicted and actual times and includes units (minutes).",
+        "gap": "The answer reverses the calculation order and misinterprets the residual sign, resulting in an incorrect conclusion about overprediction versus underprediction.",
+        "next_step": "Practice calculating residuals using actual minus predicted to ensure the sign is correct, and then interpret the results accordingly, matching positive residuals with underpredictions and negative residuals with overpredictions."
+      },
+      "latency_seconds": 1.787
+    },
+    {
+      "case_id": "residual-wrong",
+      "question_id": "residual-positive",
+      "category": "incorrect",
+      "repetition": 2,
+      "equivalence_group": null,
+      "expected": {
+        "calculation": "not_met",
+        "interpretation": "not_met"
+      },
+      "expected_score": 0,
+      "valid": true,
+      "judgments": {
+        "calculation": "not_met",
+        "interpretation": "not_met"
+      },
+      "score": 0,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "calculation",
+            "result": "not_met",
+            "evidence": "The residual is 16 - 19 = -3 minutes",
+            "explanation": "The calculation uses predicted minus actual (16 - 19) instead of actual minus predicted, resulting in -3 instead of +3."
+          },
+          {
+            "id": "interpretation",
+            "result": "not_met",
+            "evidence": "and the model overpredicted by 3 minutes",
+            "explanation": "The explanation claims the model overpredicted, but since the actual delivery took longer than predicted, the model underpredicted."
+          }
+        ],
+        "strengths": "The answer provides a clear numeric residual with correct units and an interpretation attempt that connects the sign with overprediction or underprediction.",
+        "gap": "The answer computes the residual incorrectly by subtracting predicted minus actual instead of actual minus predicted and misinterprets the sign of the residual, stating overprediction when the model actually underpredicted.",
+        "next_step": "Review the definition of residuals as actual minus predicted values and understand how the sign of the residual indicates underprediction or overprediction to correctly compute and interpret residuals."
+      },
+      "latency_seconds": 1.684
+    },
+    {
+      "case_id": "residual-uncertain",
+      "question_id": "residual-positive",
+      "category": "ambiguous",
+      "repetition": 1,
+      "equivalence_group": null,
+      "expected": {
+        "calculation": "insufficient_evidence",
+        "interpretation": "insufficient_evidence"
+      },
+      "expected_score": null,
+      "valid": true,
+      "judgments": {
+        "calculation": "insufficient_evidence",
+        "interpretation": "insufficient_evidence"
+      },
+      "score": null,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "calculation",
+            "result": "insufficient_evidence",
+            "evidence": "",
+            "explanation": "The answer 'I cannot tell from this question.' provides no calculation of residuals."
+          },
+          {
+            "id": "interpretation",
+            "result": "insufficient_evidence",
+            "evidence": "",
+            "explanation": "The answer provides no interpretation regarding whether the model overpredicted or underpredicted."
+          }
+        ],
+        "strengths": "",
+        "gap": "The response does not provide the required calculation of residuals or interpretation of overprediction/underprediction.",
+        "next_step": "Practice calculating residuals by subtracting predicted values from actual values and explaining whether the model prediction was too high or too low."
+      },
+      "latency_seconds": 1.222
+    },
+    {
+      "case_id": "residual-uncertain",
+      "question_id": "residual-positive",
+      "category": "ambiguous",
+      "repetition": 2,
+      "equivalence_group": null,
+      "expected": {
+        "calculation": "insufficient_evidence",
+        "interpretation": "insufficient_evidence"
+      },
+      "expected_score": null,
+      "valid": true,
+      "judgments": {
+        "calculation": "insufficient_evidence",
+        "interpretation": "insufficient_evidence"
+      },
+      "score": null,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "calculation",
+            "result": "insufficient_evidence",
+            "evidence": "",
+            "explanation": "The answer does not include any computation of the residual (actual minus predicted)."
+          },
+          {
+            "id": "interpretation",
+            "result": "insufficient_evidence",
+            "evidence": "",
+            "explanation": "The answer does not include an explanation whether the model underpredicted or overpredicted."
+          }
+        ],
+        "strengths": "",
+        "gap": "The answer does not compute the residual nor interpret whether the model underpredicted or overpredicted as required by the question and rubric.",
+        "next_step": "Practice calculating residuals by subtracting predicted values from actual values and interpreting whether the model overpredicted or underpredicted based on the sign of the residual."
+      },
+      "latency_seconds": 1.239
+    },
+    {
+      "case_id": "validation-correct",
+      "question_id": "model-evaluation-intermediate-check",
+      "category": "correct",
+      "repetition": 1,
+      "equivalence_group": "validation-correct",
+      "expected": {
+        "selection_bias": "met",
+        "split_roles": "met"
+      },
+      "expected_score": 100,
+      "valid": true,
+      "judgments": {
+        "selection_bias": "met",
+        "split_roles": "met"
+      },
+      "score": 100,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "selection_bias",
+            "result": "met",
+            "evidence": "uses the test set for development and makes the best reported score optimistically biased",
+            "explanation": "The answer clearly explains that selecting the best model on test scores makes the best reported score optimistically biased because the test set is used for development."
+          },
+          {
+            "id": "split_roles",
+            "result": "met",
+            "evidence": "Select using validation or cross-validation on development data, then evaluate the chosen procedure on a separate untouched final test set",
+            "explanation": "The answer correctly describes using validation or cross-validation for model selection and reserving an untouched final test set for evaluation, showing the proper role split among the data splits."
+          }
+        ],
+        "strengths": "The answer succinctly and accurately explains the problem of biased selection from test sets and clearly states the correct roles of validation and test data.",
+        "gap": "No gaps; the answer fulfills both criteria fully.",
+        "next_step": "Practice designing evaluation procedures with validation and test splits to reinforce proper model selection and assessment processes."
+      },
+      "latency_seconds": 1.562
+    },
+    {
+      "case_id": "validation-correct",
+      "question_id": "model-evaluation-intermediate-check",
+      "category": "correct",
+      "repetition": 2,
+      "equivalence_group": "validation-correct",
+      "expected": {
+        "selection_bias": "met",
+        "split_roles": "met"
+      },
+      "expected_score": 100,
+      "valid": true,
+      "judgments": {
+        "selection_bias": "met",
+        "split_roles": "met"
+      },
+      "score": 100,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "selection_bias",
+            "result": "met",
+            "evidence": "uses the test set for development and makes the best reported score optimistically biased",
+            "explanation": "The answer clearly explains that choosing the best model based on test scores means the test set is used during development, causing an optimistic bias in the best reported score."
+          },
+          {
+            "id": "split_roles",
+            "result": "met",
+            "evidence": "Select using validation or cross-validation on development data, then evaluate the chosen procedure on a separate untouched final test set",
+            "explanation": "The answer correctly states to use validation or cross-validation for model selection and to reserve an independent final test set for evaluation, thus correctly splitting the roles of data."
+          }
+        ],
+        "strengths": "The response concisely and accurately explains why selection on test scores causes bias and how to properly organize data splits for model selection and evaluation.",
+        "gap": "None; both criteria are fully addressed with correct explanations and terminology.",
+        "next_step": "Apply this knowledge in practice by ensuring model selection is performed strictly on validation or cross-validation data, and final performance is reported only on a reserved test set to avoid selection bias."
+      },
+      "latency_seconds": 1.992
+    },
+    {
+      "case_id": "validation-paraphrase",
+      "question_id": "model-evaluation-intermediate-check",
+      "category": "equivalent",
+      "repetition": 1,
+      "equivalence_group": "validation-correct",
+      "expected": {
+        "selection_bias": "met",
+        "split_roles": "met"
+      },
+      "expected_score": 100,
+      "valid": true,
+      "judgments": {
+        "selection_bias": "met",
+        "split_roles": "met"
+      },
+      "score": 100,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "selection_bias",
+            "result": "met",
+            "evidence": "The test data has influenced model choice, so its winning result is no longer an independent estimate.",
+            "explanation": "The answer clearly explains that using test data to choose the model causes the winning result to lose independence, indicating selection bias or optimistic bias."
+          },
+          {
+            "id": "split_roles",
+            "result": "met",
+            "evidence": "Tune with held-out validation folds on training/development data and reserve a fresh test set until the configuration is fixed.",
+            "explanation": "The answer correctly states that model selection should be done with validation data (held-out folds) and that the test set should be reserved for final evaluation only after configuration is decided."
+          }
+        ],
+        "strengths": "The answer concisely and accurately identifies the main problem of losing the independent nature of the test set due to model selection and correctly recommends using validation folds for tuning and reserving a final test set.",
+        "gap": "The answer could elaborately explain why repeated test set use causes optimistic bias and could explicitly name 'validation or cross-validation' as methods for model selection.",
+        "next_step": "Review examples of validation and test set usage in model selection to strengthen understanding of how data splitting impacts unbiased evaluation."
+      },
+      "latency_seconds": 1.953
+    },
+    {
+      "case_id": "validation-paraphrase",
+      "question_id": "model-evaluation-intermediate-check",
+      "category": "equivalent",
+      "repetition": 2,
+      "equivalence_group": "validation-correct",
+      "expected": {
+        "selection_bias": "met",
+        "split_roles": "met"
+      },
+      "expected_score": 100,
+      "valid": true,
+      "judgments": {
+        "selection_bias": "met",
+        "split_roles": "met"
+      },
+      "score": 100,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "selection_bias",
+            "result": "met",
+            "evidence": "The test data has influenced model choice, so its winning result is no longer an independent estimate.",
+            "explanation": "The answer clearly explains that using the test data to select the winning model causes the test result to lose its independence and thus becomes optimistic, reflecting the problem of selection bias."
+          },
+          {
+            "id": "split_roles",
+            "result": "met",
+            "evidence": "Tune with held-out validation folds on training/development data and reserve a fresh test set until the configuration is fixed.",
+            "explanation": "The answer correctly explains using validation or development data (held-out validation folds) for tuning and model selection, and keeping a separate untouched test set for final evaluation, which matches the requirement for splitting these roles."
+          }
+        ],
+        "strengths": "The answer succinctly and correctly explains both the core problem of using test data to select models and the proper evaluation setup with separate validation and test phases.",
+        "gap": "No noticeable gaps; both criteria are addressed fully and accurately, though more elaboration could improve clarity for some.",
+        "next_step": "Practice applying these concepts in model evaluation pipelines by explicitly setting up training, validation, and test splits and verifying independence of test evaluation from model selection."
+      },
+      "latency_seconds": 1.834
+    },
+    {
+      "case_id": "validation-incomplete",
+      "question_id": "model-evaluation-intermediate-check",
+      "category": "partial",
+      "repetition": 1,
+      "equivalence_group": null,
+      "expected": {
+        "selection_bias": "met",
+        "split_roles": "not_met"
+      },
+      "expected_score": 50,
+      "valid": true,
+      "judgments": {
+        "selection_bias": "met",
+        "split_roles": "not_met"
+      },
+      "score": 50,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "selection_bias",
+            "result": "met",
+            "evidence": "The reported best test score is optimistically biased because that same set was used to select the model.",
+            "explanation": "The answer correctly explains the problem that selecting the best model based on test-set scores causes an optimistic bias in the reported test score due to dependence on the test set for selection."
+          },
+          {
+            "id": "split_roles",
+            "result": "not_met",
+            "evidence": "",
+            "explanation": "The answer does not explain how the evaluation should be organized, such as using validation or cross-validation for model selection and keeping a separate final test set for unbiased evaluation."
+          }
+        ],
+        "strengths": "Clearly explains the core problem of optimistic bias caused by selecting models based on test set scores.",
+        "gap": "Does not describe the recommended evaluation organization, including how to split data into training, validation, and test sets and how to use them properly.",
+        "next_step": "Learn and practice applying the proper data splitting roles: use validation or cross-validation for model selection and keep a final independent test set untouched for evaluation to avoid selection bias."
+      },
+      "latency_seconds": 1.578
+    },
+    {
+      "case_id": "validation-incomplete",
+      "question_id": "model-evaluation-intermediate-check",
+      "category": "partial",
+      "repetition": 2,
+      "equivalence_group": null,
+      "expected": {
+        "selection_bias": "met",
+        "split_roles": "not_met"
+      },
+      "expected_score": 50,
+      "valid": true,
+      "judgments": {
+        "selection_bias": "met",
+        "split_roles": "not_met"
+      },
+      "score": 50,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "selection_bias",
+            "result": "met",
+            "evidence": "The reported best test score is optimistically biased because that same set was used to select the model.",
+            "explanation": "The answer correctly identifies that using the test set to select the model leads to optimistic bias in the reported test score, which matches the concept of selection bias explained in the rubric."
+          },
+          {
+            "id": "split_roles",
+            "result": "not_met",
+            "evidence": "",
+            "explanation": "The answer does not explain how to properly organize the evaluation by using validation or cross-validation for model selection and keeping an independent, untouched test set for the final evaluation."
+          }
+        ],
+        "strengths": "The learner correctly recognizes that repeatedly selecting models based on the test set inflates the reported performance due to optimistic bias.",
+        "gap": "The learner does not explain the proper evaluation strategy involving validation or cross-validation for model selection and reserving a final test set for unbiased evaluation.",
+        "next_step": "Study the correct data splitting strategy that differentiates the roles of training, validation, and test sets, and practice designing evaluations that hold out an independent test set for final unbiased performance estimates."
+      },
+      "latency_seconds": 1.681
+    },
+    {
+      "case_id": "validation-wrong",
+      "question_id": "model-evaluation-intermediate-check",
+      "category": "incorrect",
+      "repetition": 1,
+      "equivalence_group": null,
+      "expected": {
+        "selection_bias": "not_met",
+        "split_roles": "not_met"
+      },
+      "expected_score": 0,
+      "valid": true,
+      "judgments": {
+        "selection_bias": "not_met",
+        "split_roles": "not_met"
+      },
+      "score": 0,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "selection_bias",
+            "result": "not_met",
+            "evidence": "Choosing models using the final test scores is unbiased",
+            "explanation": "The answer incorrectly states that choosing models using final test scores is unbiased, which is false. Selecting the best model based on test scores introduces selection bias and makes the estimate overly optimistic."
+          },
+          {
+            "id": "split_roles",
+            "result": "not_met",
+            "evidence": "Use the same test set for tuning all hyperparameters and for the final independent report; no separate validation data is needed",
+            "explanation": "The answer recommends using the same test set for hyperparameter tuning and final reporting, neglecting the important practice of using separate validation data or cross-validation for model selection and reserving an untouched test set for final evaluation."
+          }
+        ],
+        "strengths": "The answer attempts to address the problem of model selection and test set usage in model evaluation.",
+        "gap": "The answer misunderstands the concept of selection bias and does not separate the roles of validation and test data appropriately, which can lead to overly optimistic final performance estimates.",
+        "next_step": "Review best practices for model evaluation, focusing on the use of separate validation sets or cross-validation for model selection, and keeping a final test set untouched until the final evaluation to avoid selection bias."
+      },
+      "latency_seconds": 1.885
+    },
+    {
+      "case_id": "validation-wrong",
+      "question_id": "model-evaluation-intermediate-check",
+      "category": "incorrect",
+      "repetition": 2,
+      "equivalence_group": null,
+      "expected": {
+        "selection_bias": "not_met",
+        "split_roles": "not_met"
+      },
+      "expected_score": 0,
+      "valid": true,
+      "judgments": {
+        "selection_bias": "not_met",
+        "split_roles": "not_met"
+      },
+      "score": 0,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "selection_bias",
+            "result": "not_met",
+            "evidence": "Choosing models using the final test scores is unbiased.",
+            "explanation": "The answer incorrectly claims that choosing models using the final test scores is unbiased, which is false. Selecting the best model based on test scores causes optimism bias, making the estimate overly optimistic and not independent."
+          },
+          {
+            "id": "split_roles",
+            "result": "not_met",
+            "evidence": "Use the same test set for tuning all hyperparameters and for the final independent report; no separate validation data is needed.",
+            "explanation": "The answer states to use the same test set for both tuning and final evaluation without separate validation data, which contradicts the principle of splitting data into training, validation, and test sets with distinct roles."
+          }
+        ],
+        "strengths": "The answer attempts to address model selection and evaluation using data sets.",
+        "gap": "Misunderstands and incorrectly asserts that selecting models based on test scores is unbiased, and fails to describe proper data splitting roles for validation and test sets.",
+        "next_step": "Study the concepts of selection bias from model selection on test data and the importance of proper data splitting, including the use of validation or cross-validation for model tuning and a separate untouched test set for final unbiased evaluation."
+      },
+      "latency_seconds": 1.927
+    },
+    {
+      "case_id": "validation-uncertain",
+      "question_id": "model-evaluation-intermediate-check",
+      "category": "ambiguous",
+      "repetition": 1,
+      "equivalence_group": null,
+      "expected": {
+        "selection_bias": "insufficient_evidence",
+        "split_roles": "insufficient_evidence"
+      },
+      "expected_score": null,
+      "valid": true,
+      "judgments": {
+        "selection_bias": "insufficient_evidence",
+        "split_roles": "insufficient_evidence"
+      },
+      "score": null,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "selection_bias",
+            "result": "insufficient_evidence",
+            "evidence": "",
+            "explanation": "The answer 'It depends. I am not sure.' provides no substantive claim or explanation about selection bias or optimism in test set performance estimates."
+          },
+          {
+            "id": "split_roles",
+            "result": "insufficient_evidence",
+            "evidence": "",
+            "explanation": "The answer does not mention the use of validation or cross-validation for model selection, nor does it mention reserving an independent final test set for evaluation."
+          }
+        ],
+        "strengths": "",
+        "gap": "The answer does not address any aspect of selection bias or the organization of data splits for model evaluation.",
+        "next_step": "Provide an explanation on why selecting a model based on test set scores leads to optimistic performance estimates, and describe the proper roles of training, validation, and test data to avoid this bias."
+      },
+      "latency_seconds": 1.285
+    },
+    {
+      "case_id": "validation-uncertain",
+      "question_id": "model-evaluation-intermediate-check",
+      "category": "ambiguous",
+      "repetition": 2,
+      "equivalence_group": null,
+      "expected": {
+        "selection_bias": "insufficient_evidence",
+        "split_roles": "insufficient_evidence"
+      },
+      "expected_score": null,
+      "valid": true,
+      "judgments": {
+        "selection_bias": "insufficient_evidence",
+        "split_roles": "insufficient_evidence"
+      },
+      "score": null,
+      "feedback": {
+        "criteria": [
+          {
+            "id": "selection_bias",
+            "result": "insufficient_evidence",
+            "evidence": "",
+            "explanation": "The answer 'It depends. I am not sure.' provides no substantive claim or explanation regarding the problem of bias caused by selecting models based on test-set scores."
+          },
+          {
+            "id": "split_roles",
+            "result": "insufficient_evidence",
+            "evidence": "",
+            "explanation": "There is no explanation or mention of how to organize the evaluation using validation or cross-validation for model selection and a separate final test set for evaluation."
+          }
+        ],
+        "strengths": "",
+        "gap": "The answer does not address the problem of bias due to selecting models based on test-set scores, nor does it explain how to properly organize evaluation data splits for model selection and testing.",
+        "next_step": "Learn about the importance of using validation data or cross-validation for model selection, and reserving a separate untouched test set to obtain an unbiased estimate of the final model's performance. Practice explaining how repeated selection on the test set causes optimistic bias in performance estimates."
+      },
+      "latency_seconds": 1.639
+    }
+  ],
+  "metrics": {
+    "completed_calls": 40,
+    "valid_calls": 40,
+    "criterion_agreement": 1.0,
+    "criterion_count": 80,
+    "score_agreement": 1.0,
+    "repeat_consistency": 1.0,
+    "repeated_cases": 20,
+    "equivalent_answer_consistency": 1.0,
+    "equivalent_pairs": 8,
+    "disagreement_cases": []
+  },
+  "finished_at": "2026-10-23T03:39:14.992585+00:00",
+  "request_accounting": "Counts represent evaluation attempts, not provider API requests. Provider request totals were not recorded."
+}

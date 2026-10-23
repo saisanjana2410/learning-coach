@@ -1,0 +1,9 @@
+import React,{useEffect,useState} from 'react';
+
+export default function FeedbackFlag({request,attemptId,onSaved}){
+ const [open,setOpen]=useState(false),[saved,setSaved]=useState(null),[reason,setReason]=useState('incorrect_score'),[note,setNote]=useState('');
+ const [busy,setBusy]=useState(false),[error,setError]=useState('');
+ useEffect(()=>{let cancelled=false;request(`/practice/${attemptId}/flag`).then(value=>{if(cancelled)return;setSaved(value);if(value){setReason(value.reason);setNote(value.note);}}).catch(()=>{});return()=>{cancelled=true;};},[attemptId]);
+ async function submit(e){e.preventDefault();setBusy(true);setError('');try{setSaved(await request(`/practice/${attemptId}/flag`,{method:'PUT',body:JSON.stringify({reason,note})}));setOpen(false);onSaved?.();}catch(e){setError(e.message);}finally{setBusy(false);}}
+ return <section className="feedback-flag"><button className="secondary" aria-expanded={open} onClick={()=>setOpen(!open)}>{saved?'Edit feedback flag':'Flag this feedback'}</button>{saved&&<p className="fine" role="status">Flag recorded locally. The original score is unchanged.</p>}{open&&<form onSubmit={submit}><h3>What seems wrong?</h3><label>Reason<select value={reason} onChange={e=>setReason(e.target.value)}><option value="incorrect_score">Score seems incorrect</option><option value="unclear_explanation">Explanation is unclear</option><option value="missing_context">Feedback missed context</option><option value="other">Something else</option></select></label><label>Details optional<textarea rows="3" maxLength="2000" value={note} onChange={e=>setNote(e.target.value)} placeholder="What did the coach miss?"/></label>{error&&<p className="error" role="alert">{error}</p>}<button className="primary" disabled={busy}>{busy?'Saving…':'Save feedback flag'}</button><p className="fine">Saved for local review; this does not trigger an automatic regrade or send a message to a reviewer.</p></form>}</section>;
+}

@@ -133,6 +133,25 @@ for q in QUESTIONS:
     elif submodule=='model-evaluation':q['lesson_id']='model-evaluation-beginner'
     elif module=='sql':q['lesson_id']=None
 
+CRITERION_DESCRIPTIONS={
+ 'python-functions-beginner-check':{
+     'output':'Correctly gives the returned numeric result for the specified function call. A concise correct value is sufficient; no derivation or terminology is required.',
+     'return_value':'Distinguishes returning a usable value to the caller from displaying output using print.'},
+ 'python-functions-intermediate-check':{
+     'evaluation_time':'Explains that the mutable default is evaluated once at function definition and reused by later calls.',
+     'replacement':'Proposes a None default with a new list initialized inside the function when no list was provided.'},
+ 'residual-positive':{
+     'calculation':'Computes actual minus predicted correctly with the signed result and appropriate units.',
+     'interpretation':'Explicitly explains that the prediction is too low or that the model underpredicted. A numeric residual alone does not answer the interpretation request.'},
+ 'model-evaluation-intermediate-check':{
+     'selection_bias':'Explains that selecting on test scores makes the winning estimate optimistic or no longer independent. The technical phrase selection bias is not required.',
+     'split_roles':'Uses validation or cross-validation for model selection and reserves independent final test data for evaluation.'},
+}
+for q in QUESTIONS:
+    if q['id'] in CRITERION_DESCRIPTIONS:
+        q['criterion_descriptions']=CRITERION_DESCRIPTIONS[q['id']]
+        q['version']=2
+
 def module_for_skill(skill):
     return next((q for q in QUESTIONS if q['skill']==skill),None)
 

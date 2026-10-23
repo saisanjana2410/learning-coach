@@ -120,3 +120,12 @@ Modules shows available, planned and unmapped matches. Mapping uses curated alia
 The additive `job_targets` table stores description, review state, extracted skills, model identifier and active selection. New endpoints are `GET /api/v1/jobs/current`, `POST /api/v1/jobs/analyze`, `PUT /api/v1/jobs/{id}/review`, and `POST /api/v1/jobs/clear`. Active recommendations are returned by `/api/v1/curriculum` and the dashboard. Live verification uses a fictional description and a temporary database; automated tests use an injected extractor.
 
 Job-description-driven interview question filtering, broader content coverage, feedback-quality benchmarking and sourced technology updates remain future work.
+
+
+## Feedback quality and learner flags
+
+Accepted feedback now offers Flag this feedback. Choose a reason and optionally describe what was missed. A local `feedback_flags` record preserves the original question, answer, feedback and evaluator model. Repeated saves update one report per attempt. Flagging never changes scores, weak areas or review dates and does not send a message to a human reviewer. Recorded flags appear in Your progress and remain editable from the assessed answer.
+
+Endpoints are `GET /api/v1/feedback/flags` and GET/PUT `/api/v1/practice/{id}/flag`. New accepted assessments record evaluator prompt and rubric versions. Existing attempts retain their original results.
+
+The development evaluation harness and baseline/refined reports are in `evals/`. It contains 20 synthetic answer cases, evaluated twice per run. The refined evaluator matched all reference judgments in that small run, compared with 69 of 80 criterion judgments at baseline. These are project-authored development labels, not independent human-reviewed or held-out accuracy results. See `evals/README.md` for definitions, limitations and the review workflow.

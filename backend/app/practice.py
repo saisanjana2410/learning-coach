@@ -11,7 +11,7 @@ from sqlalchemy import String, Text, select
 from sqlalchemy.orm import Mapped, mapped_column
 from .main import Base, Learner, SKILLS
 from .questions import QUESTIONS, public_question
-from .assessment import evaluate_answer, validate_evaluation, score
+from .assessment import evaluate_answer, validate_evaluation, score, EVALUATOR_PROMPT_VERSION
 
 class Attempt(Base):
     __tablename__='practice_attempts'
@@ -119,7 +119,7 @@ def make_router(db_session, evaluator_fn=None, help_fn=None):
         if not candidates: raise HTTPException(422,'Unknown skill.')
         history=list(db.scalars(select(Attempt).where(Attempt.status=='accepted')))
         question=min(candidates,key=lambda q:sum(json.loads(a.question_json)['id']==q['id'] for a in history))
-        question={**question,'version':1,'run_id':payload.run_id}
+        question={**question,'version':question.get('version',1),'run_id':payload.run_id}
         if payload.mode=='interview':
             question['prompt']='Interview question: '+question['prompt']+' Give a clear, concise explanation as you would to an interviewer.'
             question['criteria']=[*question['criteria'],'clarity']
@@ -156,6 +156,8 @@ def make_router(db_session, evaluator_fn=None, help_fn=None):
                 raise HTTPException(502,'Assessment could not finish. Your answer is saved; retry without changing it.') from None
             result=evaluation.model_dump(); result['score']=score(evaluation)
             result['reference']=question['reference']; result['rule_version']='revision-v1'
+            result['evaluator_prompt_version']=EVALUATOR_PROMPT_VERSION if evaluator_fn is None else 'test-evaluator'
+            result['rubric_version']=question.get('version',1)
             row.feedback_json=json.dumps(result); row.assessed_at=datetime.now(timezone.utc).isoformat()
             row.model=os.getenv('OPENAI_MODEL','gpt-4.1-mini') if evaluator_fn is None else 'test-evaluator'
             row.status='accepted'; db.commit()
