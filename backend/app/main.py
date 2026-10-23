@@ -78,7 +78,7 @@ class ChatInput(BaseModel):
 SKILLS = ['Interpret coefficients', 'Make predictions', 'Understand residuals', 'Measure prediction error', 'Evaluate on unseen data']
 TOPIC = {'id': 'linear-regression', 'title': 'Linear regression', 'description': 'Understand predictions, coefficients, and how to measure model error.', 'status': 'available', 'skills': SKILLS}
 
-def create_app(database_url=None, tutor_fn=None):
+def create_app(database_url=None, tutor_fn=None, evaluator_fn=None):
     url = database_url or os.getenv('DATABASE_URL', f'sqlite:///{(BASE / "learning.db").as_posix()}')
     engine = create_engine(url, connect_args={'check_same_thread': False} if url.startswith('sqlite') else {})
 
@@ -98,6 +98,9 @@ def create_app(database_url=None, tutor_fn=None):
     def db_session():
         with Session(engine) as session:
             yield session
+
+    from .practice import make_router, summarize
+    api.include_router(make_router(db_session, evaluator_fn))
 
     @api.get('/api/v1/health')
     def health():
@@ -178,7 +181,8 @@ def create_app(database_url=None, tutor_fn=None):
             try:
                 answer = (tutor_fn or tutor_reply)(
                     [{'role': m['role'], 'content': m['content']} for m in history],
-                    Profile.model_validate(learner).model_dump(exclude={'id', 'timezone'}), find_lesson(row.lesson_id))
+                    {**Profile.model_validate(learner).model_dump(exclude={'id', 'timezone'}),
+                     'weak_areas': summarize(db)['weak_areas']}, find_lesson(row.lesson_id))
             except Exception:
                 raise HTTPException(502, 'The tutor could not respond. Check the backend key, model access, billing, and connection, then retry this message.') from None
             history.append({'id': str(uuid4()), 'role': 'assistant', 'content': answer, 'reply_to': payload.client_message_id})
@@ -191,9 +195,10 @@ def create_app(database_url=None, tutor_fn=None):
     def dashboard(db: Session = Depends(db_session)):
         learner = db.get(Learner, 1)
         active = db.scalar(select(LearningSession).order_by(LearningSession.created_at.desc()).limit(1))
+        progress=summarize(db)
         return {'profile': Profile.model_validate(learner) if learner else None,
-                'topics': [TOPIC], 'due_reviews': [], 'weak_areas': [],
-                'assessed_skills': 0, 'active_session': {'id': active.id, 'lesson_id': active.lesson_id} if active else None,
+                'topics': [TOPIC], 'due_reviews': progress['due_reviews'], 'weak_areas': progress['weak_areas'],
+                'assessed_skills': progress['assessed_skills'], 'active_session': {'id': active.id, 'lesson_id': active.lesson_id} if active else None,
                 'generated_at': datetime.now(timezone.utc).isoformat()}
 
     return api
