@@ -92,7 +92,7 @@ def catalog(db):
                 'project_download':'/api/v1/projects/delivery-time/starter.zip',
                 'milestones':['Prepare ordered features and targets','Establish a mean baseline and held-out MAE','Fit preprocessing and select a model on validation data','Save the fitted pipeline and experiment manifest','Serve validated predictions and verify offline/API parity','Define monitoring signals and a compatible rollback']},
             'level_descriptions':LEVEL_DESCRIPTIONS,'levels':LEVELS,'modules':sorted(modules,key=lambda m:(0,FOCUS_MODULES.index(m['id'])) if m['id'] in FOCUS_MODULES else (1,m['suggested_order'] or 99)),
-            'roadmap':['Feedback quality evaluation set','Dated technology updates']}
+            'roadmap':['Feedback quality evaluation set','Broader topic coverage']}
 
 def make_curriculum_router(db_session):
     router=APIRouter(prefix='/api/v1')

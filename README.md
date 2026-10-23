@@ -6,6 +6,8 @@ The current release focuses on **Python for ML → MLOps basics → a guided del
 
 Open **Guided project** to save milestone drafts and resume your work. Each level has its own workspace with six milestones: data, baseline, training, evaluation, deployment and monitoring. Save drafts locally without an API call; request feedback when ready. Submitted versions remain immutable, retries reuse saved answers, and feedback contributes to the existing weak-area/revision tracker with links to relevant lessons. Save before leaving the workspace; moving between milestones saves changes to the current draft. A milestone meets requirements only when its latest accepted feedback meets every rubric criterion. This is AI review of submitted text, not code execution or a mastery certificate.
 
+**Tech updates** provides a manually refreshed, cached digest from official Python, scikit-learn, MLflow, PyTorch, Hugging Face Transformers and OpenAI feeds. Up to five relevant recent announcements include original links, source dates, learning suggestions and related foundations. Save a snapshot to revisit later. Refresh defaults to source excerpts without model usage. AI summaries require explicitly checking the option and use the backend OpenAI key; unchanged AI digests are reused. Opening the section makes no feed or model requests. Source failures and stale digests are identified, and a failed refresh preserves the previous digest. This is a curated feed digest, not exhaustive news coverage or a claim that every item was published today.
+
 ## Run locally
 
 Use Python 3.11 or newer and Node.js 22.12 or newer.
