@@ -107,3 +107,16 @@ Next priorities remain job-description mapping, a human-reviewed feedback evalua
 ## Submodule navigation
 
 Topic practice is entered from its submodule or lesson, not a separate sidebar destination. The selected submodule and level carry into practice without another submodule picker. Back to submodule returns to the matching curriculum section. Revision links enter the relevant practice directly; Role interview remains separate.
+
+
+## Job description learning priorities
+
+Job target lets you paste a description and title, then analyze explicit technical skills using OpenAI structured output. Every skill includes required, preferred or unspecified importance and an exact source excerpt. The extractor has one bounded repair attempt for invalid quotes; unsupported excerpts and duplicate names cannot be saved as valid analysis. The pasted description is sent to OpenAI only when analyzed; analysis may use a second call for evidence correction.
+
+Analysis creates a draft without changing your active path. Review skill names, change importance, remove irrelevant skills, or add missing skills with exact supporting excerpts. Save reviewed learning path to activate it. A new draft leaves the previous reviewed target active until saved. Use role defaults deactivates the target without deleting learning history or changing module levels. Job descriptions and reviews remain local in the ignored database.
+
+Modules shows available, planned and unmapped matches. Mapping uses curated aliases rather than an LLM inventing module identifiers. Required skills rank before unspecified and preferred skills; recorded weak areas raise priority within each importance group. Suggested prerequisites appear separately from extracted requirements. These are learning priorities, not hiring eligibility or a job-fit score. Broad skills can map to an entire module; available starter lessons do not imply comprehensive coverage.
+
+The additive `job_targets` table stores description, review state, extracted skills, model identifier and active selection. New endpoints are `GET /api/v1/jobs/current`, `POST /api/v1/jobs/analyze`, `PUT /api/v1/jobs/{id}/review`, and `POST /api/v1/jobs/clear`. Active recommendations are returned by `/api/v1/curriculum` and the dashboard. Live verification uses a fictional description and a temporary database; automated tests use an injected extractor.
+
+Job-description-driven interview question filtering, broader content coverage, feedback-quality benchmarking and sourced technology updates remain future work.

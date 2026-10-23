@@ -80,7 +80,7 @@ SKILLS = ['Interpret coefficients', 'Make predictions', 'Understand residuals', 
 SKILLS = list(dict.fromkeys(SKILLS+[q['skill'] for q in QUESTIONS]))
 TOPIC = {'id': 'linear-regression', 'title': 'Linear regression', 'description': 'Understand predictions, coefficients, and how to measure model error.', 'status': 'available', 'skills': SKILLS[:5]}
 
-def create_app(database_url=None, tutor_fn=None, evaluator_fn=None, help_fn=None):
+def create_app(database_url=None, tutor_fn=None, evaluator_fn=None, help_fn=None, job_extractor_fn=None):
     url = database_url or os.getenv('DATABASE_URL', f'sqlite:///{(BASE / "learning.db").as_posix()}')
     engine = create_engine(url, connect_args={'check_same_thread': False} if url.startswith('sqlite') else {})
 
@@ -105,6 +105,8 @@ def create_app(database_url=None, tutor_fn=None, evaluator_fn=None, help_fn=None
     from .curriculum_api import make_curriculum_router
     api.include_router(make_curriculum_router(db_session))
     api.include_router(make_router(db_session, evaluator_fn, help_fn))
+    from .jobs import make_job_router
+    api.include_router(make_job_router(db_session,job_extractor_fn))
 
     @api.get('/api/v1/health')
     def health():

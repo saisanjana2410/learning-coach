@@ -40,9 +40,33 @@ def catalog(db):
             submodules.append({'id':sid,'title':title,'status':'available' if lessons else 'planned','lessons':lessons})
         modules.append({**{k:v for k,v in m.items() if k!='submodules'},'level':level,'recommended':m['id'] in path,
                         'suggested_order':path.index(m['id'])+1 if m['id'] in path else None,'submodules':submodules})
-    return {'role':role,'path_label':label,'recommendation_source':'Curated role template; no job description has been analyzed.',
+    from .jobs import active_job,recommendations
+    active=active_job(db)
+    job_plan=None
+    source='Curated role template; no reviewed job description is active.'
+    if active:
+        from .practice import summarize
+        job_plan=recommendations(active,modules,summarize(db))
+        path=[]
+        module_index={m['id']:m for m in modules}
+        def include(module_id):
+            if module_id in path:return
+            for prerequisite in module_index[module_id]['prerequisites']:include(prerequisite)
+            path.append(module_id)
+        for item in job_plan['items']:
+            if item['module_id'] in module_index:include(item['module_id'])
+        for module in modules:
+            module['recommended']=module['id'] in path
+            module['suggested_order']=path.index(module['id'])+1 if module['id'] in path else None
+            matches=[i['name'] for i in job_plan['items'] if i['module_id']==module['id']]
+            module['recommendation_kind']='job_skill' if matches else 'prerequisite' if module['recommended'] else 'explore'
+            if matches:module['reason']+=' Matches reviewed job skills: '+', '.join(matches)+'.'
+            elif module['recommended']:module['reason']+=' Suggested prerequisite; not an extracted job requirement.'
+        label='Preparation for '+active.title
+        source='Reviewed job description skills, mapped using curated aliases. Prerequisites are separate suggestions.'
+    return {'role':role,'path_label':label,'recommendation_source':source,'job_plan':job_plan,
             'levels':LEVELS,'modules':sorted(modules,key=lambda m:m['suggested_order'] or 99),
-            'roadmap':['Job description skill mapping','Feedback quality evaluation set','Dated technology updates']}
+            'roadmap':['Feedback quality evaluation set','Dated technology updates']}
 
 def make_curriculum_router(db_session):
     router=APIRouter(prefix='/api/v1')
