@@ -128,7 +128,7 @@ def recommendations(row,modules,progress):
         items.append({**skill,'module_id':module_id,'module_title':module['title'] if module else None,
             'submodule_id':submodule_id,'level':module['level'] if module else None,'status':status,
             'reason':reason,'weak_areas':[p['skill'] for p in gaps],
-            'available_submodules':[{'id':s['id'],'title':s['title'],'lessons':s['lessons']} for s in available]})
+            'available_submodules':[{'id':s['id'],'title':s['title'],'level':s['level'],'lessons':s['lessons']} for s in available]})
     items.sort(key=lambda i:({'required':0,'unspecified':1,'preferred':2}[i['requirement']],not bool(i['weak_areas']),i['name'].casefold()))
     return {'job_id':row.id,'title':row.title,'items':items,
             'counts':{status:sum(i['status']==status for i in items) for status in ('available','planned','unmapped')}}

@@ -5,7 +5,7 @@ Role suggestions are curated defaults, not job-description extraction.
 from .content import LESSONS
 from .questions import QUESTIONS
 
-LEVELS=('beginner','intermediate','advanced')
+LEVELS=('beginner','foundational','intermediate','advanced')
 MODULES=[
  {'id':'python','title':'Python for AI and ML','reason':'Write reliable data transformations, experiments, and model services.','prerequisites':[],
   'submodules':[('python-functions','Functions and reusable code',True),('python-collections','Collections and iteration',True),('python-basics','Variables and control flow',False),('numpy','NumPy arrays',False),('pandas','pandas and tabular data',False),('python-oop','Classes and project structure',False)]},
@@ -160,14 +160,17 @@ def question_metadata(question):
     current=next((q for q in QUESTIONS if q['id']==question['id']),{})
     return {**current,**question}
 
+from .track_catalog import build_track_catalog, resolve_role
+TRACK_CATALOG=build_track_catalog(MODULES,SUBMODULES)
+
 def role_path(role):
-    normalized=role.casefold()
-    if any(word in normalized for word in ('ml','machine learning','ai','artificial intelligence')):
-        return ['python','math','ml','deep-learning','ai','engineering'], 'AI and ML engineering foundation'
-    if 'data' in normalized:return ['python','math','ml','engineering'], 'Data-focused foundation'
-    if any(word in normalized for word in ('software','backend','developer')):return ['python','engineering','ml'], 'Software-focused starting path'
+    role_id=resolve_role(role)
+    track=next((r for r in TRACK_CATALOG['roles'] if r['id']==role_id),None)
+    if track:
+        ids=[SUBMODULES[link['topic_id']]['module_id'] for link in TRACK_CATALOG['role_topics'] if link['role_id']==role_id]
+        return list(dict.fromkeys(ids)),track['title']+' learning path'
     return ['python','math','ml'], 'General technical starting path; tailor it to your target role'
 
-def scoped_questions(topic_id,level,module_levels=None):
+def scoped_questions(topic_id,level,module_levels=None,topic_levels=None):
     return [q for q in QUESTIONS if (q['submodule_id']==topic_id if topic_id else True)
-            and q['level']==(module_levels.get(q['module_id'],level) if module_levels is not None else level)]
+            and q['level']==((topic_levels or {}).get(q['submodule_id'],module_levels.get(q['module_id'],level)) if module_levels is not None else level)]

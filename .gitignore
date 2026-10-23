@@ -12,3 +12,4 @@ dist/
 docs/qa/
 .DS_Store
 *.log
+backend/backups/

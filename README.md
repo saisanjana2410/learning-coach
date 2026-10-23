@@ -129,3 +129,6 @@ Accepted feedback now offers Flag this feedback. Choose a reason and optionally 
 Endpoints are `GET /api/v1/feedback/flags` and GET/PUT `/api/v1/practice/{id}/flag`. New accepted assessments record evaluator prompt and rubric versions. Existing attempts retain their original results.
 
 The development evaluation harness and baseline/refined reports are in `evals/`. It contains 20 synthetic answer cases, evaluated twice per run. The refined evaluator matched all reference judgments in that small run, compared with 69 of 80 criterion judgments at baseline. These are project-authored development labels, not independent human-reviewed or held-out accuracy results. See `evals/README.md` for definitions, limitations and the review workflow.
+# Shared role curriculum
+
+Modules now includes five role tracks, the full supplied roadmap and four starting levels, including Foundational. Set a subject level and optionally override individual topics. Existing learning history is preserved. New roadmap entries and project ladders are marked planned until their lessons and specifications are authored. See [the shared curriculum model and migration notes](docs/shared-curriculum.md).

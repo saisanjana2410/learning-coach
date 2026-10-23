@@ -33,7 +33,7 @@ class Learner(Base):
 
 class ProfileInput(BaseModel):
     target_role: str = Field(min_length=2, max_length=120)
-    experience: Literal['beginner', 'intermediate', 'advanced']
+    experience: Literal['beginner', 'foundational', 'intermediate', 'advanced']
     study_minutes: int = Field(ge=5, le=240)
     timezone: str = Field(max_length=80)
 
@@ -86,7 +86,22 @@ def create_app(database_url=None, tutor_fn=None, evaluator_fn=None, help_fn=None
 
     @asynccontextmanager
     async def lifespan(app):
+        from .catalog_models import seed_catalog
+        # Keep a local recovery copy before the first additive catalog migration.
+        if database_url is None and engine.url.drivername=='sqlite' and engine.url.database:
+            import sqlite3
+            database_path=Path(engine.url.database)
+            if database_path.is_file():
+                with sqlite3.connect(database_path) as source:
+                    migrated=source.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='schema_migrations'").fetchone()
+                    if not migrated:
+                        backup_dir=BASE/'backups';backup_dir.mkdir(exist_ok=True)
+                        backup_path=backup_dir/'before-shared-curriculum-v1.db'
+                        if not backup_path.exists():
+                            with sqlite3.connect(backup_path) as destination:source.backup(destination)
         Base.metadata.create_all(engine)
+        with Session(engine) as db:
+            seed_catalog(db)
         yield
         engine.dispose()
 
@@ -137,7 +152,7 @@ def create_app(database_url=None, tutor_fn=None, evaluator_fn=None, help_fn=None
 
     @api.get('/api/v1/lessons')
     def lessons(submodule_id:str|None=None,level:str|None=None):
-        if level is not None and level not in ('beginner','intermediate','advanced'):
+        if level is not None and level not in ('beginner','foundational','intermediate','advanced'):
             raise HTTPException(422,'Unknown learning level.')
         if submodule_id is None:return LESSONS[:3]
         return [l for l in LESSONS if l['submodule_id']==submodule_id and (level is None or l['level']==level)]

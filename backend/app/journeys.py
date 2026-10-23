@@ -11,7 +11,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from .main import Base, Learner, ChatInput
 from .practice import Attempt, serialize, summarize
 from .curriculum import SUBMODULES, LEVELS, question_metadata
-from .curriculum_api import RunPreference, module_levels
+from .curriculum_api import RunPreference, module_levels, topic_levels
 
 # One local worker: shared lock prevents next/finish/submit from racing.
 practice_lock = RLock()
@@ -91,8 +91,8 @@ def make_journey_router(db_session,start_question,help_fn=None):
             run=LearningRun(id=str(uuid4()),scope=payload.scope,topic_id=payload.topic_id if payload.scope=='topic' else None,
                             role=learner.target_role,mode=payload.mode,status='active',created_at=datetime.now(timezone.utc).isoformat())
             db.add(run);db.flush()
-            levels=module_levels(db)
-            level=levels.get(submodule['module_id'],'beginner') if submodule else learner.experience
+            levels=module_levels(db);topic_preferences=topic_levels(db)
+            level=topic_preferences[submodule['id']] if submodule else learner.experience
             if payload.level is not None:
                 if payload.level not in LEVELS:
                     db.rollback();raise HTTPException(422,'Unknown learning level.')
@@ -100,8 +100,17 @@ def make_journey_router(db_session,start_question,help_fn=None):
                 if run.scope=='role' and payload.skill:
                     from .curriculum import module_for_skill
                     match=module_for_skill(payload.skill)
-                    if match:levels[match['module_id']]=level
-            db.add(RunPreference(run_id=run.id,config_json=json.dumps({'level':level,'module_levels':levels})))
+                    if match:topic_preferences[match['submodule_id']]=level
+            config={'level':level,'module_levels':levels,'topic_levels':topic_preferences}
+            if run.scope=='role':
+                from .curriculum import TRACK_CATALOG
+                from .track_catalog import resolve_role
+                role_id=resolve_role(learner.target_role)
+                if role_id:
+                    config['role_topic_ids']=[link['topic_id'] for link in TRACK_CATALOG['role_topics'] if link['role_id']==role_id]
+                    # Preserve the existing SQL interview bank for backend/data roles.
+                    if role_id!='react-frontend':config['role_topic_ids'].append('sql')
+            db.add(RunPreference(run_id=run.id,config_json=json.dumps(config)))
             db.flush()
             # Adopt an unanswered question from the earlier single-question UI.
             legacy=db.scalar(select(Attempt).where(Attempt.status.in_(['awaiting_answer','failed'])).limit(1))

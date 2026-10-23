@@ -13,7 +13,7 @@ export default function PracticeFlow({request,selection,onUpdated,scope='topic',
  const [busy,setBusy]=useState(false),[loading,setLoading]=useState(true),[error,setError]=useState('');
  const [curriculum,setCurriculum]=useState(null);
  const topicId=selection?.topicId||'linear-regression';
- const availableTopics=(curriculum?.modules||[]).flatMap(m=>m.submodules.filter(s=>s.status==='available').map(s=>({...s,moduleTitle:m.title,level:m.level})));
+ const availableTopics=(curriculum?.modules||[]).flatMap(m=>m.submodules.filter(s=>s.status==='available').map(s=>({...s,moduleTitle:m.title,level:s.level})));
  const selectedTopic=availableTopics.find(s=>s.id===topicId);
  const run=value?.run,attempt=value?.attempt,feedback=attempt?.feedback;
  function restore(v){setValue(v);setAnswer(v?.attempt?.answer||'');if(v?.run)setMode(v.run.mode);}

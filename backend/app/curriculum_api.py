@@ -3,11 +3,13 @@ import json
 from typing import Literal
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from sqlalchemy import String, Text
+from sqlalchemy import String, Text, select
 from sqlalchemy.orm import Mapped, mapped_column
 from .main import Base, Learner
-from .curriculum import MODULES, SUBMODULES, LEVELS, role_path
+from .curriculum import MODULES, SUBMODULES, LEVELS, role_path, TRACK_CATALOG
 from .content import LESSONS
+from .catalog_models import TopicPreference
+from .track_catalog import resolve_role, LEVEL_DESCRIPTIONS
 
 class ModulePreference(Base):
     __tablename__='module_preferences'
@@ -20,24 +22,40 @@ class RunPreference(Base):
     config_json: Mapped[str]=mapped_column(Text)
 
 class LevelInput(BaseModel):
-    level: Literal['beginner','intermediate','advanced']
+    level: Literal['beginner','foundational','intermediate','advanced']
 
 def module_levels(db):
     learner=db.get(Learner,1)
     fallback=learner.experience if learner else 'beginner'
     return {m['id']:(row.level if (row:=db.get(ModulePreference,m['id'])) else fallback) for m in MODULES}
 
+class TopicLevelInput(BaseModel):
+    level: Literal['beginner','foundational','intermediate','advanced'] | None
+
+class RoleInput(BaseModel):
+    role_id: str
+
+def topic_levels(db):
+    levels=module_levels(db)
+    overrides={p.topic_id:p.level for p in db.scalars(select(TopicPreference).where(TopicPreference.learner_id==1))}
+    return {sid:overrides.get(sid,levels[t['module_id']]) for sid,t in SUBMODULES.items()}
+
 def catalog(db):
     learner=db.get(Learner,1);role=learner.target_role if learner else 'AI/ML Engineer'
-    path,label=role_path(role);levels=module_levels(db)
+    path,label=role_path(role);levels=module_levels(db);topics=topic_levels(db)
+    role_id=resolve_role(role)
+    track=next((r for r in TRACK_CATALOG['roles'] if r['id']==role_id),None)
+    relevant={r['topic_id'] for r in TRACK_CATALOG['role_topics'] if r['role_id']==role_id}
+    overrides={p.topic_id for p in db.scalars(select(TopicPreference).where(TopicPreference.learner_id==1))}
     modules=[]
     for m in MODULES:
         level=levels[m['id']]
         submodules=[]
         for sid,title,available in m['submodules']:
+            selected_level=topics[sid]
             lessons=[{'id':l['id'],'title':l['title'],'skill':l['skill'],'minutes':l['minutes']} for l in LESSONS
-                     if l['submodule_id']==sid and l['level']==level]
-            submodules.append({'id':sid,'title':title,'status':'available' if lessons else 'planned','lessons':lessons})
+                     if l['submodule_id']==sid and l['level']==selected_level]
+            submodules.append({**SUBMODULES[sid],'level':selected_level,'level_source':'topic' if sid in overrides else 'module','relevant_to_role':sid in relevant,'available_levels':list(dict.fromkeys(l['level'] for l in LESSONS if l['submodule_id']==sid)),'id':sid,'title':title,'status':'available' if lessons else 'planned','lessons':lessons})
         modules.append({**{k:v for k,v in m.items() if k!='submodules'},'level':level,'recommended':m['id'] in path,
                         'suggested_order':path.index(m['id'])+1 if m['id'] in path else None,'submodules':submodules})
     from .jobs import active_job,recommendations
@@ -65,13 +83,33 @@ def catalog(db):
         label='Preparation for '+active.title
         source='Reviewed job description skills, mapped using curated aliases. Prerequisites are separate suggestions.'
     return {'role':role,'path_label':label,'recommendation_source':source,'job_plan':job_plan,
-            'levels':LEVELS,'modules':sorted(modules,key=lambda m:m['suggested_order'] or 99),
+            'track':track,'roles':[{'id':r['id'],'title':r['title']} for r in TRACK_CATALOG['roles']],
+            'level_descriptions':LEVEL_DESCRIPTIONS,'levels':LEVELS,'modules':sorted(modules,key=lambda m:m['suggested_order'] or 99),
             'roadmap':['Feedback quality evaluation set','Dated technology updates']}
 
 def make_curriculum_router(db_session):
     router=APIRouter(prefix='/api/v1')
     @router.get('/curriculum')
     def get_catalog(db=Depends(db_session)):return catalog(db)
+
+    @router.put('/curriculum/role')
+    def save_role(payload:RoleInput,db=Depends(db_session)):
+        role=next((r for r in TRACK_CATALOG['roles'] if r['id']==payload.role_id),None)
+        if not role:raise HTTPException(422,'Unknown role track.')
+        learner=db.get(Learner,1)
+        if not learner:raise HTTPException(409,'Create your learning profile first.')
+        learner.target_role=role['title'];db.commit();return catalog(db)
+
+    @router.put('/curriculum/topics/{topic_id}/level')
+    def save_topic_level(topic_id:str,payload:TopicLevelInput,db=Depends(db_session)):
+        if topic_id not in SUBMODULES:raise HTTPException(404,'Topic not found.')
+        if not db.get(Learner,1):raise HTTPException(409,'Create your learning profile first.')
+        row=db.get(TopicPreference,(1,topic_id))
+        if payload.level is None:
+            if row:db.delete(row)
+        elif row:row.level=payload.level
+        else:db.add(TopicPreference(learner_id=1,topic_id=topic_id,level=payload.level))
+        db.commit();return catalog(db)
 
     @router.put('/curriculum/{module_id}/level')
     def save_level(module_id:str,payload:LevelInput,db=Depends(db_session)):

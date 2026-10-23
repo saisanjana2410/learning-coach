@@ -1,0 +1,795 @@
+Learner levels
+
+Beginner: New to the area; guided explanations and exercises.
+
+Foundational: Knows basics; builds small applications and practices core libraries.
+
+Intermediate: Can build projects; learns integrations, testing and debugging.
+
+Advanced: Focuses on system design, performance, security and production reliability.
+
+Track skill level per topic or skill, not just per user. A learner may know Python well but be new to RAG.
+
+Complete module and subtopic catalog
+
+AI Engineer
+
+01. Python for AI
+
+Python syntax and data types
+
+Conditions, loops and functions
+
+Lists, dictionaries and comprehensions
+
+OOP and exception handling
+
+Virtual environments and packages
+
+02. Mathematics for ML
+
+Linear algebra: vectors, matrices and tensors
+
+Matrix operations and dot products
+
+Probability and distributions
+
+Statistics and hypothesis testing
+
+Derivatives, gradients and optimization
+
+03. Data Analysis
+
+NumPy arrays and broadcasting
+
+Pandas DataFrames
+
+Data cleaning and missing values
+
+Exploratory data analysis
+
+Matplotlib and Seaborn
+
+04. Machine Learning Fundamentals
+
+Supervised vs unsupervised learning
+
+Training, validation and test splits
+
+Linear and logistic regression
+
+Decision trees and random forests
+
+KNN, SVM and clustering
+
+05. Model Evaluation
+
+Accuracy, precision, recall and F1
+
+Confusion matrices and ROC-AUC
+
+Cross-validation
+
+Overfitting, underfitting and regularization
+
+Hyperparameter tuning
+
+06. Feature Engineering
+
+Categorical encoding
+
+Scaling and normalization
+
+Feature selection
+
+Handling imbalanced datasets
+
+Data leakage and reproducible pipelines
+
+07. Deep Learning
+
+Perceptrons and neural networks
+
+Forward propagation and backpropagation
+
+Activation and loss functions
+
+Gradient descent and optimizers
+
+TensorFlow/Keras and PyTorch basics
+
+08. Specialized AI
+
+CNNs and computer vision
+
+RNNs, LSTMs and sequence models
+
+Transformers and attention
+
+NLP fundamentals
+
+Transfer learning and embeddings
+
+09. Model Deployment
+
+Model serialization
+
+FastAPI inference endpoints
+
+Request validation
+
+Docker containers
+
+Batch vs real-time inference
+
+10. MLOps
+
+MLflow and experiment tracking
+
+Dataset and model versioning
+
+Training pipelines
+
+CI/CD for ML
+
+Model monitoring and drift
+
+11. Responsible AI
+
+Bias and fairness
+
+Explainability with SHAP/LIME
+
+Privacy and data protection
+
+Robustness and adversarial risks
+
+Human oversight
+
+12. AI System Design
+
+Training-serving consistency
+
+Latency and throughput
+
+Model registry and rollback
+
+Scalable inference
+
+End-to-end ML architecture
+
+React Frontend Developer
+
+01. Web Fundamentals
+
+How the internet and browsers work
+
+HTTP, HTTPS and DNS
+
+Client-server architecture
+
+DOM and browser rendering
+
+Developer tools
+
+02. HTML
+
+Semantic HTML
+
+Forms and validation
+
+Tables and media
+
+Accessibility fundamentals
+
+SEO basics
+
+03. CSS
+
+Selectors and specificity
+
+Box model and positioning
+
+Flexbox and Grid
+
+Responsive design and media queries
+
+Transitions and animations
+
+04. JavaScript Fundamentals
+
+Variables and data types
+
+Functions and scope
+
+Arrays and objects
+
+DOM events
+
+ES6+ syntax
+
+05. Advanced JavaScript
+
+Closures and lexical scope
+
+Promises and async/await
+
+Event loop and execution context
+
+Modules and imports
+
+Fetch API and error handling
+
+06. React Fundamentals
+
+JSX and components
+
+Props and component composition
+
+State and event handling
+
+Conditional rendering and lists
+
+useState and useEffect
+
+07. React Application Development
+
+React Router
+
+Forms and validation
+
+Custom hooks
+
+Context API
+
+API integration and loading states
+
+08. State Management
+
+Local vs global state
+
+Context and reducers
+
+Redux Toolkit or Zustand
+
+Server state with TanStack Query
+
+State normalization
+
+09. TypeScript for React
+
+Types and interfaces
+
+Props typing
+
+Generics
+
+Typing hooks and events
+
+API response types
+
+10. UI Engineering
+
+Design systems
+
+Reusable components
+
+Tailwind CSS or CSS Modules
+
+Accessibility and keyboard navigation
+
+Responsive UI patterns
+
+11. Testing and Performance
+
+Vitest/Jest
+
+React Testing Library
+
+End-to-end testing with Playwright
+
+Memoization and code splitting
+
+Profiling and Core Web Vitals
+
+12. Production Frontend
+
+Authentication UI flows
+
+XSS and browser security
+
+Next.js and SSR/SSG
+
+Build tools and environment variables
+
+Deployment, monitoring and CI/CD
+
+Python Developer
+
+01. Python Basics
+
+Variables and types
+
+Operators and expressions
+
+Conditions and loops
+
+Strings and collections
+
+Input and output
+
+02. Functions and Modules
+
+Functions and return values
+
+Arguments and keyword parameters
+
+Scope and closures
+
+Modules and packages
+
+Virtual environments and pip
+
+03. Object-Oriented Python
+
+Classes and objects
+
+Constructors and properties
+
+Inheritance and polymorphism
+
+Encapsulation and abstraction
+
+Dataclasses and special methods
+
+04. Intermediate Python
+
+Comprehensions
+
+Iterators and generators
+
+Decorators
+
+Context managers
+
+Type hints
+
+05. Files and Automation
+
+File and directory operations
+
+CSV and JSON
+
+Regular expressions
+
+Command-line arguments
+
+Automation scripts and scheduling
+
+06. Error Handling and Testing
+
+Exceptions and custom errors
+
+Logging
+
+Debugging and breakpoints
+
+Pytest and mocking
+
+Linting and formatting
+
+07. Databases
+
+SQL fundamentals
+
+Joins and aggregation
+
+PostgreSQL integration
+
+SQLAlchemy ORM
+
+Transactions and migrations
+
+08. Web APIs
+
+HTTP and REST
+
+FastAPI routing
+
+Pydantic validation
+
+Dependency injection
+
+API documentation
+
+09. Authentication and Security
+
+Password hashing
+
+JWT and sessions
+
+Authorization and permissions
+
+Input validation
+
+Secrets management and OWASP basics
+
+10. Async and Background Work
+
+async/await and event loops
+
+Threading vs multiprocessing
+
+Background tasks
+
+Queues and workers
+
+Retries and idempotency
+
+11. Deployment and DevOps
+
+Docker
+
+Environment configuration
+
+GitHub Actions
+
+Cloud deployment
+
+Monitoring and structured logs
+
+12. Advanced Backend Engineering
+
+Caching with Redis
+
+API pagination and rate limiting
+
+Architecture and design patterns
+
+Performance profiling
+
+Scalability and reliability
+
+GenAI Engineer
+
+01. Python for GenAI
+
+Python functions and OOP
+
+Async programming
+
+HTTP clients and APIs
+
+FastAPI fundamentals
+
+Environment variables and secrets
+
+02. AI and LLM Foundations
+
+AI vs ML vs deep learning vs GenAI
+
+Neural networks overview
+
+Transformers and attention
+
+Tokenization and context windows
+
+Training vs inference
+
+03. LLM APIs
+
+Chat completion concepts
+
+System and user messages
+
+Temperature and sampling
+
+Streaming responses
+
+Structured outputs and JSON schemas
+
+04. Prompt Engineering
+
+Instruction design
+
+Zero-shot and few-shot prompting
+
+Prompt templates
+
+Prompt injection awareness
+
+Prompt evaluation and versioning
+
+05. Embeddings and Vector Search
+
+Embeddings and semantic similarity
+
+Cosine similarity
+
+Vector indexing
+
+Vector databases and metadata filtering
+
+Hybrid search
+
+06. RAG Fundamentals
+
+Document ingestion
+
+Parsing and chunking
+
+Embedding pipelines
+
+Retrieval and context assembly
+
+Grounded answers and citations
+
+07. Advanced RAG
+
+Query rewriting and decomposition
+
+Hybrid retrieval
+
+Reranking
+
+Context compression
+
+RAG evaluation and failure analysis
+
+08. Tool Calling and Agents
+
+Tool/function calling
+
+Agent loops and state
+
+Planning and execution
+
+Tool permissions and validation
+
+Human-in-the-loop approval
+
+09. Agent Frameworks
+
+LangChain components
+
+LangGraph state graphs
+
+Workflow orchestration
+
+Checkpoints and persistence
+
+Retries, timeouts and recovery
+
+10. Memory and Context
+
+Conversation history
+
+Short-term vs long-term memory
+
+Summarization and context management
+
+Memory retrieval
+
+Privacy and retention
+
+11. Model Customization
+
+Fine-tuning fundamentals
+
+Instruction datasets
+
+LoRA and PEFT concepts
+
+When to use RAG vs fine-tuning
+
+Evaluation of customized models
+
+12. Production GenAI
+
+Tracing and observability
+
+Latency, caching and cost
+
+Guardrails and output validation
+
+Security and prompt injection defense
+
+Deployment, monitoring and evaluation
+
+MERN Full Stack Developer
+
+01. Web Foundations
+
+Internet and HTTP
+
+Client-server architecture
+
+Git and GitHub
+
+Command line
+
+Browser developer tools
+
+02. HTML and CSS
+
+Semantic HTML
+
+Forms and validation
+
+Flexbox and Grid
+
+Responsive design
+
+Accessibility
+
+03. JavaScript
+
+Variables, types and functions
+
+Arrays and objects
+
+Scope and closures
+
+Promises and async/await
+
+Modules and Fetch API
+
+04. React
+
+JSX and components
+
+Props and state
+
+Hooks
+
+Routing
+
+Forms and API integration
+
+05. Advanced React
+
+Custom hooks
+
+Context and global state
+
+React Query
+
+Performance optimization
+
+TypeScript basics
+
+06. Node.js
+
+Node runtime and event loop
+
+npm and packages
+
+CommonJS vs ES modules
+
+Filesystem and streams
+
+Environment configuration
+
+07. Express.js
+
+Routes and controllers
+
+Middleware
+
+REST API design
+
+Request validation
+
+Centralized error handling
+
+08. MongoDB
+
+Documents and collections
+
+CRUD operations
+
+Mongoose schemas
+
+Relationships and population
+
+Indexes and aggregation
+
+09. Authentication and Security
+
+Password hashing
+
+JWT and cookie sessions
+
+Authorization and RBAC
+
+CORS, CSRF and XSS
+
+Rate limiting and validation
+
+10. Full Stack Integration
+
+React-Express API communication
+
+Authentication flows
+
+File uploads
+
+Pagination and filtering
+
+Real-time communication with WebSockets
+
+11. Testing and Deployment
+
+Unit and integration testing
+
+API testing
+
+React component testing
+
+Docker and environment variables
+
+Cloud deployment and CI/CD
+
+12. Advanced Full Stack
+
+System design fundamentals
+
+Redis caching
+
+Queues and background jobs
+
+Database performance
+
+Observability and scaling
+
+Suggested project ladder
+
+AI Engineer
+
+Beginner: Dataset exploration and visualization
+
+Foundational: Regression/classification prediction app
+
+Intermediate: Deep-learning model served through FastAPI
+
+Advanced: Monitored production-style ML pipeline
+
+React Frontend Developer
+
+Beginner: Responsive portfolio
+
+Foundational: React task or weather dashboard
+
+Intermediate: E-commerce UI with API integration
+
+Advanced: Accessible, tested production dashboard
+
+Python Developer
+
+Beginner: CLI expense tracker
+
+Foundational: Automation script backed by SQL
+
+Intermediate: Authenticated FastAPI task API
+
+Advanced: Scalable service with caching, monitoring and CI/CD
+
+GenAI Engineer
+
+Beginner: LLM chatbot
+
+Foundational: Chat-with-documents RAG app
+
+Intermediate: Research agent with tools and citations
+
+Advanced: Evaluated production agent workflow with approvals
+
+MERN Full Stack Developer
+
+Beginner: Responsive interactive website
+
+Foundational: Full-stack notes CRUD app
+
+Intermediate: Multi-user e-commerce or booking app
+
+Advanced: Production MERN app with caching and observability
