@@ -103,3 +103,7 @@ A new practice run snapshots its level and the module-level interview preference
 The additive tables are `module_preferences` and `run_preferences`. `GET /api/v1/curriculum` returns suggestions, prerequisites, available content and planned entries. `PUT /api/v1/curriculum/{module_id}/level` saves a preference. `GET /api/v1/lessons?submodule_id=...&level=...` retrieves the matching lessons. Content metadata uses stable module, submodule, level and lesson identifiers; the legacy unfiltered lesson endpoint remains compatible.
 
 Next priorities remain job-description mapping, a human-reviewed feedback evaluation set, and dated technology updates. None of those is represented as a completed feature. Source references for the starter concepts include the official Python tutorial at https://docs.python.org/3/tutorial/ and scikit-learn evaluation documentation at https://scikit-learn.org/stable/modules/cross_validation.html.
+
+## Submodule navigation
+
+Topic practice is entered from its submodule or lesson, not a separate sidebar destination. The selected submodule and level carry into practice without another submodule picker. Back to submodule returns to the matching curriculum section. Revision links enter the relevant practice directly; Role interview remains separate.

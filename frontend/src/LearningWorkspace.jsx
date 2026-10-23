@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import CoachMessage from './CoachMessage';
 import 'katex/dist/katex.min.css';
 
-export default function LearningWorkspace({ request, initialSession, onSession, onPractice, selection }) {
+export default function LearningWorkspace({ request, initialSession, onSession, onPractice, selection, onBack }) {
   const [lessons, setLessons] = useState([]);
   const [session, setSession] = useState(null);
   const [status, setStatus] = useState(null);
@@ -46,7 +46,7 @@ export default function LearningWorkspace({ request, initialSession, onSession, 
       setText('');
     } catch(e) { setError(e.message); } finally { setBusy(false); }
   }
-  return <><div className="intro"><p className="eyebrow">{session?.lesson.module_id?.toUpperCase() || 'LEARNING'} · {session?.lesson.level || selection?.level || 'beginner'} · LEARN MODE</p><h1>Start with understanding.</h1><p>Read a short lesson, explore an example, and ask your tutor a question.</p></div>
+  return <><button className="secondary submodule-back" onClick={()=>onBack?.(session?.lesson.submodule_id||selection?.submoduleId)}>← Back to submodule</button><div className="intro"><p className="eyebrow">{session?.lesson.module_id?.toUpperCase() || 'LEARNING'} · {session?.lesson.level || selection?.level || 'beginner'} · LEARN MODE</p><h1>Start with understanding.</h1><p>Read a short lesson, explore an example, and ask your tutor a question.</p></div>
     {loading ? <p role="status">Loading lessons…</p> : <>
       {!lessons.length && <button onClick={initialize}>Retry loading lessons</button>}
       <div className="lesson-tabs" aria-label="Lessons">{lessons.map((l,i) => <button key={l.id} disabled={busy} className={session?.lesson_id === l.id ? 'active' : ''} onClick={() => start(l)}><small>LESSON {i+1} · {l.minutes} MIN</small>{l.title}</button>)}</div>
